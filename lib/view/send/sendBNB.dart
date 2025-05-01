@@ -4,20 +4,20 @@ import 'package:crypto_bee/widgets/button.dart';
 import 'package:crypto_bee/widgets/loading.dart';
 import 'package:crypto_bee/widgets/textField.dart';
 import 'package:crypto_bee/x.dart';
-import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter/material.dart'; 
+import 'package:hooks_riverpod/hooks_riverpod.dart'; 
 
-class Sendbnb extends ConsumerStatefulWidget {
-  const Sendbnb({super.key});
-  static const routeName = '/sendbnb';
+class SendBnb extends ConsumerStatefulWidget {
+  const SendBnb({Key? key}) : super(key: key);
+  static const routeName = '/sendBnb';
 
   @override
-  ConsumerState<Sendbnb> createState() => _SendbtcState();
+  ConsumerState<SendBnb> createState() => _SendBnbState();
 }
 
-class _SendbtcState extends ConsumerState<Sendbnb> {
-  bool _isLoading = false;
-  final _formKey = GlobalKey<FormState>();
+class _SendBnbState extends ConsumerState<SendBnb> {
+  bool _isLoading = false; 
+  final _formKey = GlobalKey<FormState>(); 
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
 
@@ -133,10 +133,12 @@ class _SendbtcState extends ConsumerState<Sendbnb> {
                 ? const Loading()
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: button(
-                      context,
+                    child: CustomButton(
+                        name: 
                       'Verify',
-                      _verify,
+                     onTap:  _verify,
+                        color: Theme.of(context).primaryColor,
+                    
                     ),
                   ),
             const SizedBox(height: 30),
@@ -147,30 +149,55 @@ class _SendbtcState extends ConsumerState<Sendbnb> {
   }
 
   Widget _buildSearchTextField() {
-    return reusableTextField(
-      'Search or Enter',
-      _searchController,
-      Theme.of(context).primaryColor,
-      () {
-        return null;
-      },
-    );
-  }
+    return CustomTextField(
+                  labelText: 'Enter Wallet Address', 
+                  hintText: 'hold to paste address',
+                  controller: _searchController,
+                  );
+      }
 
   Widget _buildAmountTextField() {
-    return transferTextField(
-      Image.asset(
-        'assets/images/bnb.png',
-        height: 18,
-        width: 18,
-      ),
-      'BNB Amount',
-      _amountController,
-      Theme.of(context).primaryColor,
-      () {
-        return null;
-      },
-    );
+    return SizedBox(
+          width: 300,
+          child: TextFormField(
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return "Amount in Dollars is Required";
+                }
+                return null;
+              },
+              controller: _amountController,
+              textInputAction: TextInputAction.done,
+              textAlign: TextAlign.justify,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ' \$ ',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                labelText: 'BNB amount',
+                hintText: '$bnbPrice',
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              keyboardType: TextInputType.number),
+        );
+    
   }
 
   Widget _buildPercentageButtons() {

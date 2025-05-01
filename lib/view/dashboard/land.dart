@@ -22,7 +22,7 @@ class _LandState extends ConsumerState<Land> with WidgetsBindingObserver {
   bool willpop = false;
 
   final pages = [
-    Profile(),
+    Explore(),
     Wallet(),
     Stake(),
     History(),

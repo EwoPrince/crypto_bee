@@ -4,6 +4,7 @@ import 'package:crypto_bee/view/auth/login_step/signin.dart';
 import 'package:crypto_bee/view/auth/login_step/signup.dart';
 import 'package:crypto_bee/widgets/button.dart';
 import 'package:crypto_bee/x.dart';
+import 'package:crypto_bee/widgets/column_with_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -18,24 +19,25 @@ class Onboarding extends StatefulWidget {
 }
 
 class _OnboardingState extends State<Onboarding> {
-  late ScrollController _scrollController;
-  late ScrollController _sscrollController;
-  late ScrollController _xscrollController;
-  Timer? _scrollTimer; // Timer for continuous scrolling
+  late ScrollController _scrollController1, _scrollController2, _scrollController3;
+  late ScrollController _scrollController4; // Add this line
+  Timer? _scrollTimer;
   Timer? _userInteractionTimer; // Timer to resume after user interaction
   bool _isUserScrolling = false; // Flag to track user interaction
   final double _scrollSpeed = 40.0; // Pixels per second
   final Duration _scrollInterval =
       const Duration(milliseconds: 30); // How often to update scroll position
   final Duration _userScrollPauseDuration =
-      const Duration(seconds: 3); // How long to wait after user interaction
-  final Duration _restartDelay = Duration(milliseconds: 500);
+      const Duration(seconds: 2); // How long to wait after user interaction
+  final Duration _restartDelay = const Duration(milliseconds: 100);
+  final ScrollController _mainScrollController = ScrollController();
   @override
   void initState() {
+    _scrollController4 = ScrollController();
     super.initState();
-    _scrollController = ScrollController();
-    _sscrollController = ScrollController();
-    _xscrollController = ScrollController();
+    _scrollController1 = ScrollController();
+    _scrollController2 = ScrollController();
+    _scrollController3 = ScrollController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -48,16 +50,17 @@ class _OnboardingState extends State<Onboarding> {
   void dispose() {
     _scrollTimer?.cancel();
     _userInteractionTimer?.cancel();
-    _scrollController.dispose();
-    _sscrollController.dispose();
-    _xscrollController.dispose();
+    _scrollController1.dispose();
+    _scrollController2.dispose();
+    _scrollController3.dispose();
+    _scrollController4.dispose();
     super.dispose();
   }
 
   void _startAutoScrollTimer() {
     _scrollTimer?.cancel();
     _userInteractionTimer?.cancel();
-    if (!mounted || !_scrollController.hasClients) {
+    if (!mounted || !_scrollControllers().any((controller) => controller.hasClients)) {
       Future.delayed(_restartDelay, () {
         if (mounted) _startAutoScrollTimer();
       });
@@ -68,38 +71,25 @@ class _OnboardingState extends State<Onboarding> {
       if (!mounted || _isUserScrolling) return;
 
       _scrollTimer = Timer.periodic(_scrollInterval, (timer) {
-        if (!mounted || !_scrollController.hasClients || _isUserScrolling) {
+        if (!mounted || _scrollControllers().any((controller) => !controller.hasClients) || _isUserScrolling) {
           timer.cancel();
-          return;
-        }
+        } 
+         _scrollControllers().forEach((controller) {
+            double maxExtent = controller.position.maxScrollExtent;
+            double currentPosition = controller.position.pixels;
+            double scrollAmount = (_scrollSpeed * _scrollInterval.inMilliseconds / 1000.0);
+            double newPosition = currentPosition + scrollAmount;
 
-        double maxExtent = _scrollController.position.maxScrollExtent;
-        double currentPosition = _scrollController.position.pixels;
-        double scrollAmount =
-            (_scrollSpeed * _scrollInterval.inMilliseconds / 1000.0);
-        double newPosition = currentPosition + scrollAmount;
-
-        if (newPosition >= maxExtent) {
-          _scrollController.animateTo(
-            0.0,
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOut,
-          );
-          _sscrollController.animateTo(
-            0.0,
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOut,
-          );
-          _xscrollController.animateTo(
-            0.0,
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeOut,
-          );
-        } else {
-          _scrollController.jumpTo(newPosition);
-          _sscrollController.jumpTo(newPosition);
-          _xscrollController.jumpTo(newPosition);
-        }
+            if (newPosition >= maxExtent) {
+               controller.animateTo(
+                  controller.position.minScrollExtent,
+                  duration: const Duration(milliseconds: 800),
+                  curve: Curves.easeOut,
+                );
+            } else {
+              controller.jumpTo(newPosition);
+            }
+          });
       });
     });
   }
@@ -123,18 +113,20 @@ class _OnboardingState extends State<Onboarding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+        controller: _mainScrollController,
+        child: Center(
+            child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ColumnWithSpacing(
+              spacing: 10,
               children: [
-                SizedBox(height: 10),
                 Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
-                    border: Border.all(
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+                     border: Border.all(
                       color: Theme.of(context).secondaryHeaderColor,
                     ),
                     borderRadius: BorderRadius.circular(12),
@@ -144,13 +136,13 @@ class _OnboardingState extends State<Onboarding> {
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
+                        children:  [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
-                                alignment: Alignment.center,
+                                  alignment: Alignment.center,
                                 width: 50,
                                 height: 50,
                                 child: Image.asset("assets/splash.png"),
@@ -158,11 +150,11 @@ class _OnboardingState extends State<Onboarding> {
                             ),
                           ),
                           SizedBox(width: 2),
-                          Text(
+                       Text(
                             'CryptoBee',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
-                        ],
+                       ],
                       ),
                       InkWell(
                         onTap: () {
@@ -189,74 +181,71 @@ class _OnboardingState extends State<Onboarding> {
                   children: [
                     Align(
                       alignment: Alignment.centerRight,
-                      child: Container(
-                        alignment: Alignment.center,
+                      child: SizedBox(
                         width: 550,
                         height: 550,
                         child: SvgPicture.asset("assets/images/rewards.svg"),
                       ),
                     ),
-                    Column(
+                    ColumnWithSpacing(
+                      spacing: 10,
                       children: [
-                        SizedBox(height: 30),
                         Text(
                           'Trade Beyond Limits with CryptoBee',
                           style: Theme.of(context).textTheme.headlineLarge,
                         ),
-                        SizedBox(height: 10),
                         Text(
                           'Unleash Crypto Freedom: Limitless, Trustworthy, and Sign-Up Free.',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white54),
                         ),
-                        SizedBox(height: 30),
-                        button(context, 'Start Trading', () {
+                        CustomButton(
+                        color: Theme.of(context).primaryColor,
+                    name: 'Start Trading',onTap:  () {
                           goto(context, Signin.routeName, null);
                         }),
-                        SizedBox(height: 30),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Excellent',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(color: Colors.white30),
+                          ),
+                          Text(
+                            '  4.7 out of 5',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(color: Colors.white),
+                          ),
+                         const SizedBox(width: 12),
+                          Icon(
+                            Icons.star,
+                            color: Colors.green.shade400,
+                          ),
+                         const SizedBox(width: 4),
+                          Text(
+                            'Trustpilot',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ],
+                      ),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Text(
-                              'Excellent',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(color: Colors.white30),
-                            ),
-                            Text(
-                              '  4.7 out of 5',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(color: Colors.white),
-                            ),
-                            SizedBox(width: 12),
-                            Icon(
-                              Icons.star,
-                              color: Colors.green.shade400,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              'Trustpilot',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(color: Colors.white),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Column(
+                            ColumnWithSpacing(spacing: 10,
                               children: [
-                                Text(
+                                 Text(
                                   '\$12.46B+',
                                   style:
                                       Theme.of(context).textTheme.headlineLarge,
                                 ),
-                                SizedBox(height: 10),
+                                SizedBox(height: 5),
                                 Text(
                                   '24h Trading Volume',
                                   style: Theme.of(context)
@@ -265,15 +254,14 @@ class _OnboardingState extends State<Onboarding> {
                                       .copyWith(color: Colors.white30),
                                 ),
                               ],
-                            ),
-                            Column(
+                            ),ColumnWithSpacing(spacing: 10,
                               children: [
                                 Text(
                                   '2600+',
                                   style:
                                       Theme.of(context).textTheme.headlineLarge,
                                 ),
-                                SizedBox(height: 10),
+                                SizedBox(height: 5),
                                 Text(
                                   'Cryptocurrencies',
                                   style: Theme.of(context)
@@ -282,15 +270,14 @@ class _OnboardingState extends State<Onboarding> {
                                       .copyWith(color: Colors.white30),
                                 ),
                               ],
-                            ),
-                            Column(
+                            ),ColumnWithSpacing(spacing: 10, 
                               children: [
                                 Text(
                                   '150%',
                                   style:
                                       Theme.of(context).textTheme.headlineLarge,
                                 ),
-                                SizedBox(height: 10),
+                                SizedBox(height: 5),
                                 Text(
                                   'Simple Earn APR',
                                   style: Theme.of(context)
@@ -302,17 +289,15 @@ class _OnboardingState extends State<Onboarding> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 20),
-                      ],
-                    ),
+                       ]),
                   ],
                 ),
-                SizedBox(height: 50),
+                SizedBox(height: 40),
                 Text(
-                  'The seamless interchain experience',
+                  'Experience Seamless Interchain Integration',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Text(
                   'All your tokens, DeFi positions, NFT collections, and transaction history across all major networks.',
                   style: Theme.of(context)
@@ -320,68 +305,64 @@ class _OnboardingState extends State<Onboarding> {
                       .bodyMedium!
                       .copyWith(color: Colors.white30),
                 ),
-                SizedBox(height: 40),
+                 const SizedBox(height: 40),
                 Wrap(
                   direction: Axis.horizontal,
                   spacing: 8,
                   children: [
                     SizedBox(
-                      width: 420,
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Row(
-                            children: [
-                              Column(
-                                children: [
-                                  Text(
-                                    'Buy Sell',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineLarge,
-                                  ),
-                                  SizedBox(height: 10),
-                                  SizedBox(
-                                    width: 240,
-                                    child: Text(
-                                      'The purpose of \'Buy\' and \'Sell\' is to facilitate trading by providing clear options for executing market transactions.',
+                      width: 450,
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Row(children: [
+                              ColumnWithSpacing(spacing: 10,
+                                  children: [ 
+                                    Text(
+                                      'Buy Sell',
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyMedium!
-                                          .copyWith(
-                                              color: const Color.fromRGBO(
-                                                  255, 255, 255, 0.302)),
+                                          .headlineLarge,
                                     ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Container(
-                                    width: 150,
-                                    height: 40,
-                                    child: ElevatedButton(
-                                      onPressed: () {},
+                                     SizedBox(
+                                      width: 230,
                                       child: Text(
-                                        'Fast Trade',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16,
-                                        ),
+                                        'The purpose of \'Buy\' and \'Sell\' is to facilitate trading by providing clear options for executing market transactions.',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(
+                                                color:  Color.fromRGBO(
+                                                    255, 255, 255, 0.302)),
                                       ),
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all(
-                                                  Colors.red.shade400),
-                                          shape: WidgetStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                              RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)))),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(width: 10),
+                                    SizedBox(
+                                      width: 150,
+                                      height: 40,
+                                      child: ElevatedButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          'Fast Trade',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.red.shade400),
+                                            shape: WidgetStateProperty.all<
+                                                    RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)))),
+                                      ),
+                                    ),
+                                  ]),
+                               const SizedBox(width: 10),
                               Container(
                                 alignment: Alignment.center,
                                 width: 140,
@@ -390,66 +371,61 @@ class _OnboardingState extends State<Onboarding> {
                               ),
                             ],
                           ),
-                        ),
-                      ),
+                        )),
                     ),
                     SizedBox(
-                      width: 420,
+                      width: 450,
                       child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Row(
-                            children: [
-                              Column(
-                                children: [
-                                  Text(
-                                    'Swap/DEX',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineLarge,
-                                  ),
-                                  SizedBox(height: 10),
-                                  SizedBox(
-                                    width: 240,
-                                    child: Text(
-                                      'Swap/DEX allows users to trade cryptocurrencies directly without intermediaries, enabling fast and decentralized transactions.',
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Row(children: [
+                              ColumnWithSpacing(spacing: 10,
+                                  children: [
+                                    Text(
+                                      'Swap/DEX',
                                       style: Theme.of(context)
                                           .textTheme
-                                          .bodyMedium!
-                                          .copyWith(
-                                              color: const Color.fromRGBO(
-                                                  255, 255, 255, 0.302)),
+                                          .headlineLarge,
                                     ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Container(
-                                    width: 220,
-                                    height: 40,
-                                    child: ElevatedButton(
-                                      onPressed: () {},
+                                     SizedBox(
+                                      width: 230,
                                       child: Text(
-                                        'Start with confidence',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 16,
-                                        ),
+                                        'Swap/DEX allows users to trade cryptocurrencies directly without intermediaries, enabling fast and decentralized transactions.',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .copyWith(
+                                                color: const Color.fromRGBO(
+                                                    255, 255, 255, 0.302)),
                                       ),
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStateProperty.all(
-                                                  Colors.blue.shade400),
-                                          shape: WidgetStateProperty.all<
-                                                  RoundedRectangleBorder>(
-                                              RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10)))),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(width: 10),
+                                    Container(
+                                      width: 220,
+                                      height: 40,
+                                      child: ElevatedButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          'Start with confidence',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        style: ButtonStyle(
+                                            backgroundColor:
+                                                WidgetStateProperty.all(
+                                                    Colors.blue.shade400),
+                                            shape: WidgetStateProperty.all<
+                                                    RoundedRectangleBorder>(
+                                                RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)))),
+                                      ),
+                                    ),
+                                  ]),
+                              const SizedBox(width: 10),
                               Container(
                                 alignment: Alignment.center,
                                 width: 140,
@@ -459,29 +435,26 @@ class _OnboardingState extends State<Onboarding> {
                               ),
                             ],
                           ),
-                        ),
-                      ),
+                        )),
                     ),
                   ],
                 ),
                 SizedBox(height: 20),
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: 8,
-                  children: [
+                Wrap(direction: Axis.horizontal, spacing: 8, children: [
                     SizedBox(
-                      width: 300,
+                     width: 300,
                       child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
+                          child: Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: ColumnWithSpacing(spacing: 10,
                             children: [
-                              Container(
+                               Container(
                                 alignment: Alignment.center,
+                                  padding: const EdgeInsets.all(8.0),
                                 width: 100,
                                 height: 100,
                                 child: SvgPicture.asset("assets/images/10.svg"),
-                              ),
+                              ), 
                               Text(
                                 'Fast Exchange',
                                 style:
@@ -489,7 +462,7 @@ class _OnboardingState extends State<Onboarding> {
                               ),
                               SizedBox(height: 10),
                               SizedBox(
-                                width: 240,
+                                width: 230,
                                 child: Text(
                                   'Fast Exchange enables quick and seamless cryptocurrency trades, ensuring efficient transactions with minimal delays.',
                                   style: Theme.of(context)
@@ -500,17 +473,16 @@ class _OnboardingState extends State<Onboarding> {
                                               255, 255, 255, 0.302)),
                                 ),
                               ),
-                            ],
+                             ],),
                           ),
-                        ),
                       ),
                     ),
                     SizedBox(
-                      width: 300,
-                      child: Card(
-                        child: Padding(
+                      width: 300, 
+                       child: Card(
+                           child: Padding(
                           padding: const EdgeInsets.all(5.0),
-                          child: Column(
+                          child: ColumnWithSpacing(spacing: 10,
                             children: [
                               Container(
                                 alignment: Alignment.center,
@@ -523,9 +495,9 @@ class _OnboardingState extends State<Onboarding> {
                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),
-                              SizedBox(height: 10),
+                            
                               SizedBox(
-                                width: 240,
+                                width: 230,
                                 child: Text(
                                   'Instant Buy allows you to purchase cryptocurrencies quickly and effortlessly at real-time market prices.',
                                   style: Theme.of(context)
@@ -536,17 +508,16 @@ class _OnboardingState extends State<Onboarding> {
                                               255, 255, 255, 0.302)),
                                 ),
                               ),
-                            ],
+                           ],),
                           ),
-                        ),
-                      ),
+                       ),
                     ),
                     SizedBox(
                       width: 300,
-                      child: Card(
-                        child: Padding(
+                       child: Card(
+                            child: Padding(
                           padding: const EdgeInsets.all(5.0),
-                          child: Column(
+                            child: ColumnWithSpacing(spacing: 10,
                             children: [
                               Container(
                                 alignment: Alignment.center,
@@ -559,9 +530,9 @@ class _OnboardingState extends State<Onboarding> {
                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),
-                              SizedBox(height: 10),
+                              
                               SizedBox(
-                                width: 240,
+                                width: 230,
                                 child: Text(
                                   'Spot Trading enables you to buy and sell cryptocurrencies instantly at current market prices with full ownership of your assets.',
                                   style: Theme.of(context)
@@ -572,52 +543,51 @@ class _OnboardingState extends State<Onboarding> {
                                               255, 255, 255, 0.302)),
                                 ),
                               ),
-                            ],
+                             ],),
                           ),
-                        ),
-                      ),
+                       ),
                     ),
-                  ],
+                   ],
+                 
                 ),
-                SizedBox(height: 50),
+                SizedBox(height: 40),
                 Text(
-                  'Elevate your Web3 experience',
+                  'Elevate Your Web3 Experience',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Text(
                   'All your tokens, DeFi positions, NFT collections, and transaction history across all major networks.',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith( 
                       color: const Color.fromRGBO(255, 255, 255, 0.302)),
                 ),
                 SizedBox(height: 30),
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: 8,
-                  children: [
-                    SizedBox(
-                      width: 600,
-                      child: Card(
+               Wrap(direction: Axis.horizontal, spacing: 8,
+                 children: [
+                   SizedBox(
+                    width: 400,
+                       child: Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
+                           padding: const EdgeInsets.all(5.0),
+                           child: ColumnWithSpacing(spacing: 10,
+                             
+                           children: [
                               Text(
                                 'Multiple wallets support',
-                                style:
+                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),
                               SizedBox(height: 10),
-                              SizedBox(
-                                width: 540,
+                               SizedBox(
+                                width: 350,
                                 child: Text(
                                   'Unlock the power of crypto with our developer-friendly platform, enabling your business to accept payments on popular networks.',
                                   style: Theme.of(context).textTheme.bodyMedium,
-                                  textAlign: TextAlign.center,
+                                  textAlign: TextAlign.left,
                                 ),
                               ),
                               SizedBox(height: 70),
-                              Text(
+                                Text(
                                 'Available on',
                                 style: Theme.of(context)
                                     .textTheme
@@ -627,6 +597,7 @@ class _OnboardingState extends State<Onboarding> {
                                             255, 255, 255, 0.302)),
                               ),
                               SizedBox(height: 10),
+                           
                               Wrap(
                                 direction: Axis.horizontal,
                                 spacing: 2,
@@ -672,29 +643,28 @@ class _OnboardingState extends State<Onboarding> {
                                     "rainbow",
                                   ),
                                 ],
-                              ),
-                            ],
-                          ),
+                              ), 
+                            ],),
                         ),
-                      ),
+                    ),
                     ),
                     SizedBox(
-                      width: 270,
+                      width: 320,
                       child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(5.0),
-                          child: Column(
-                            children: [
+                        child: Padding(  
+                           padding: const EdgeInsets.all(5.0),
+                            child: ColumnWithSpacing(spacing: 10,
+                             children: [
                               Text(
-                                'Multiple wallets support',
-                                style:
+                                'Multiple cryptocurrencies',
+                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),
                               SizedBox(height: 10),
                               SizedBox(
-                                width: 240,
+                                width: 230,
                                 child: Text(
-                                  'Unlock the power of crypto with our developer-friendly platform, enabling your business to accept payments on popular networks.',
+                                  'Swap Bitcoin, Ethereum, all the most popular altcoins, and thousands of other crypto assets instantly.',
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium!
@@ -706,7 +676,7 @@ class _OnboardingState extends State<Onboarding> {
                               ),
                               SizedBox(height: 40),
                               NotificationListener<ScrollNotification>(
-                                onNotification:
+                                 onNotification:
                                     (ScrollNotification notification) {
                                   if (notification is ScrollStartNotification) {
                                     if (notification.dragDetails != null) {
@@ -719,13 +689,13 @@ class _OnboardingState extends State<Onboarding> {
                                   return false;
                                 },
                                 child: SizedBox(
-                                  height: 105,
-                                  child: ListView(
-                                    controller: _scrollController,
+                                   height: 105,
+                                    child: ListView(
+                                    controller: _scrollController1,
                                     scrollDirection: Axis.horizontal,
                                     children: [
                                       crypbox("assets/images/mnt.svg"),
-                                      crypbox("assets/images/stx.svg"),
+                                    crypbox("assets/images/stx.svg"),
                                       crypbox("assets/images/near.svg"),
                                       crypbox("assets/images/op.svg"),
                                       crypbox("assets/images/eth.svg"),
@@ -743,7 +713,7 @@ class _OnboardingState extends State<Onboarding> {
                               ),
                               NotificationListener<ScrollNotification>(
                                 onNotification:
-                                    (ScrollNotification notification) {
+                                  (ScrollNotification notification) {
                                   if (notification is ScrollStartNotification) {
                                     if (notification.dragDetails != null) {
                                       _pauseAutoScroll();
@@ -755,10 +725,10 @@ class _OnboardingState extends State<Onboarding> {
                                   return false;
                                 },
                                 child: SizedBox(
-                                  height: 105,
+                                   height: 105,
                                   child: ListView(
                                     reverse: true,
-                                    controller: _sscrollController,
+                                    controller: _scrollController1,
                                     scrollDirection: Axis.horizontal,
                                     children: [
                                       crypbox("assets/images/avax.svg"),
@@ -777,13 +747,13 @@ class _OnboardingState extends State<Onboarding> {
                                     ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                                ),
+                            ],),
                         ),
-                      ),
+                       ),
                     ),
                   ],
+                  
                 ),
                 SizedBox(height: 30),
                 Text(
@@ -792,25 +762,23 @@ class _OnboardingState extends State<Onboarding> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  'You might also be interested in',
+                  'Explore More Possibilities',
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 Text(
-                  'Metaverse evolution of connectivity, compute & collaboration in the digital realm· An era of new possibilities·',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: const Color.fromRGBO(255, 255, 255, 0.302)),
+                  'Discover the future with our web3 products. Experience new level of digital era.',
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: const Color.fromRGBO(255, 255, 255, 0.302)),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 30),
-                Wrap(
-                  children: [
+                SizedBox(height: 20),
+                Wrap( children: [
                     SizedBox(
-                      width: 500,
-                      child: Card(
-                        child: Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Column(
+                       width: 500,
+                        child: Card(
+                            child: Padding(
+                         padding: EdgeInsets.all(5.0),
+                           child: Column(
                             children: [
                               Container(
                                 alignment: Alignment.center,
@@ -827,7 +795,7 @@ class _OnboardingState extends State<Onboarding> {
                               ),
                               SizedBox(height: 10),
                               SizedBox(
-                                width: 440,
+                                width: 380,
                                 child: Text(
                                   'Swaps supports 13 available and 18 on-demand blockchain integrations.',
                                   style: Theme.of(context)
@@ -836,12 +804,12 @@ class _OnboardingState extends State<Onboarding> {
                                       .copyWith(
                                           color: const Color.fromRGBO(
                                               255, 255, 255, 0.302)),
-                                ),
-                              ),
-                              SizedBox(
-                                width: 500,
-                                child: Card(
-                                  child: Padding(
+                                ), 
+                              ), 
+                               SizedBox(
+                                width: 440,
+                                child: Card(   
+                                    child: Padding(
                                     padding: EdgeInsets.all(5.0),
                                     child: Column(
                                       children: [
@@ -856,7 +824,7 @@ class _OnboardingState extends State<Onboarding> {
                                             ScrollNotification>(
                                           onNotification: (ScrollNotification
                                               notification) {
-                                            if (notification
+                                             if (notification
                                                 is ScrollStartNotification) {
                                               if (notification.dragDetails !=
                                                   null) {
@@ -864,15 +832,15 @@ class _OnboardingState extends State<Onboarding> {
                                               }
                                             } else if (notification
                                                 is ScrollEndNotification) {
-                                              _resumeAutoScrollAfterDelay();
+                                           _resumeAutoScrollAfterDelay();
                                             }
-                                            return false;
+                                          return false;
                                           },
                                           child: SizedBox(
                                             height: 105,
-                                            child: ListView(
-                                              controller: _scrollController,
-                                              scrollDirection: Axis.horizontal,
+                                             child: ListView(
+                                              controller: _scrollController1,
+                                               scrollDirection: Axis.horizontal,
                                               children: [
                                                 crypbox(
                                                     "assets/images/sandbox.svg"),
@@ -895,7 +863,7 @@ class _OnboardingState extends State<Onboarding> {
                                           color: Colors.white,
                                           height: 1,
                                         ),
-                                        SizedBox(height: 18),
+                                         SizedBox(height: 18),
                                         Row(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -940,8 +908,8 @@ class _OnboardingState extends State<Onboarding> {
                                             ),
                                             SizedBox(width: 8),
                                             Icon(
-                                              Icons.star,
-                                              color: Colors.green.shade400,
+                                              Icons.star_rate_rounded,
+                                              color: Colors.orange,
                                             ),
                                             SizedBox(width: 4),
                                             Text(
@@ -959,13 +927,13 @@ class _OnboardingState extends State<Onboarding> {
                                   ),
                                 ),
                               ),
-                            ],
+                             ],),
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
+                       ), ],
+                    ), Padding(
                       padding: EdgeInsets.all(5),
+
                       child: Column(
                         children: [
                           SizedBox(
@@ -976,14 +944,14 @@ class _OnboardingState extends State<Onboarding> {
                                 children: [
                                   Container(
                                     width: 80,
-                                    height: 80,
+                                    height: 70,
                                     child: SvgPicture.asset(
                                         "assets/images/lowfees.svg"),
                                   ),
                                   Column(
                                     children: [
                                       Text(
-                                        'Low fees.',
+                                        'Low Transaction Fees',
                                         style: Theme.of(context)
                                             .textTheme
                                             .headlineLarge,
@@ -1015,7 +983,7 @@ class _OnboardingState extends State<Onboarding> {
                                 children: [
                                   Container(
                                     width: 80,
-                                    height: 80,
+                                    height: 70,
                                     child: SvgPicture.asset(
                                         "assets/images/up50.svg"),
                                   ),
@@ -1054,7 +1022,7 @@ class _OnboardingState extends State<Onboarding> {
                                 children: [
                                   Container(
                                     width: 80,
-                                    height: 80,
+                                    height: 70,
                                     child: SvgPicture.asset(
                                         "assets/images/trans.svg"),
                                   ),
@@ -1062,7 +1030,7 @@ class _OnboardingState extends State<Onboarding> {
                                     children: [
                                       Text(
                                         'Transparent.',
-                                        style: Theme.of(context)
+                                        style: Theme.of(context) 
                                             .textTheme
                                             .headlineLarge,
                                       ),
@@ -1093,7 +1061,7 @@ class _OnboardingState extends State<Onboarding> {
                                 children: [
                                   Container(
                                     width: 80,
-                                    height: 80,
+                                    height: 70,
                                     child: SvgPicture.asset(
                                         "assets/images/ultra.svg"),
                                   ),
@@ -1127,11 +1095,11 @@ class _OnboardingState extends State<Onboarding> {
                         ],
                       ),
                     ),
-                  ],
-                ),
+                  
+                 
                 SizedBox(height: 30),
-                Container(
-                  height: 400,
+               Container(
+                  height: 180,
                   width: MediaQuery.of(context).size.width * 0.8,
                   decoration: BoxDecoration(
                       color: Colors.green,
@@ -1148,7 +1116,7 @@ class _OnboardingState extends State<Onboarding> {
                         SizedBox(
                           child: Text(
                             'Earn rewards effortlessly with high-yield opportunities and secure investments.',
-                            style: Theme.of(context)
+                            style: Theme.of(context) 
                                 .textTheme
                                 .bodyMedium!
                                 .copyWith(
@@ -1161,10 +1129,10 @@ class _OnboardingState extends State<Onboarding> {
                   ),
                 ),
                 SizedBox(height: 30),
-                Wrap(
+                Wrap( 
                   direction: Axis.horizontal,
                   spacing: 8,
-                  children: [
+                  children:  [
                     Container(
                       alignment: Alignment.center,
                       width: 500,
@@ -1174,14 +1142,14 @@ class _OnboardingState extends State<Onboarding> {
                     Container(
                       width: 500,
                       child: Padding(
-                        padding: EdgeInsets.all(12),
+                         padding: EdgeInsets.all(12),
                         child: Column(
                           children: [
                             SizedBox(
                               width: 430,
                               child: Text(
                                 'Instant swap with cashback',
-                                style:
+                                style: 
                                     Theme.of(context).textTheme.headlineLarge,
                                 textAlign: TextAlign.left,
                               ),
@@ -1191,7 +1159,7 @@ class _OnboardingState extends State<Onboarding> {
                               width: 450,
                               child: Text(
                                 'Instant swaps with cashback—trade seamlessly and earn rewards on every exchange. Enjoy fast, secure transactions with competitive rates while getting extra value on your trades. Swap assets effortlessly and maximize your returns with every transaction.',
-                                style: Theme.of(context)
+                                style: Theme.of(context) 
                                     .textTheme
                                     .bodyMedium!
                                     .copyWith(
@@ -1218,7 +1186,7 @@ class _OnboardingState extends State<Onboarding> {
                                 SizedBox(width: 12),
                                 Text(
                                   'Buy, sell, and store differnt cryptocurrencies',
-                                  style:
+                                  style: 
                                       Theme.of(context).textTheme.labelMedium,
                                 ),
                               ],
@@ -1242,7 +1210,7 @@ class _OnboardingState extends State<Onboarding> {
                                 SizedBox(width: 12),
                                 Text(
                                   'Powerful tools, designed for the advanced trader',
-                                  style:
+                                  style: 
                                       Theme.of(context).textTheme.labelMedium,
                                 ),
                               ],
@@ -1260,19 +1228,21 @@ class _OnboardingState extends State<Onboarding> {
                                   ),
                                   child: Icon(
                                     Icons.check_circle,
-                                    color: Colors.white,
+                        color: Theme.of(context).primaryColor,
                                   ),
                                 ),
                                 SizedBox(width: 12),
                                 Text(
                                   'Deposit crypto easily from exchanges',
-                                  style:
+                                  style: 
                                       Theme.of(context).textTheme.labelMedium,
                                 ),
                               ],
                             ),
                             SizedBox(height: 12),
-                            button(context, 'Start Trading', () {
+                            CustomButton(
+                    color: Colors.white,
+                    name:  'Start Trading', onTap:  () {
                               goto(context, Signup.routeName, null);
                             }),
                           ],
@@ -1281,12 +1251,10 @@ class _OnboardingState extends State<Onboarding> {
                     ),
                   ],
                 ),
-                SizedBox(height: 30),
-              ],
-            ),
+                SizedBox(height: 30),]),
+              
+            ),)
           ),
-        ),
-      ),
     );
   }
 
@@ -1303,7 +1271,7 @@ class _OnboardingState extends State<Onboarding> {
           padding: EdgeInsets.all(4),
           child: Row(
             children: [
-              Container(
+             Container(
                 alignment: Alignment.center,
                 width: 40,
                 height: 40,
@@ -1331,5 +1299,12 @@ class _OnboardingState extends State<Onboarding> {
         child: SvgPicture.asset(image),
       ),
     );
+  }
+
+
+  List<ScrollController> _scrollControllers(){
+     return [
+       _scrollController1, _scrollController2, _scrollController3, _scrollController4,
+     ];
   }
 }

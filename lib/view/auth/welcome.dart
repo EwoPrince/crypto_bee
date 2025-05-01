@@ -43,10 +43,11 @@ class _WelcomeState extends State<Welcome> {
               ),
             ),
             SizedBox(height: 30),
-            button(
-              context,
+         CustomButton(
+                    color: Colors.white,
+                    name: 
               'Done',
-              () {
+             onTap: () {
                 become(context, VerifiedState.routeName, null);
               },
             ),

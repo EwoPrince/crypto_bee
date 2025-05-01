@@ -1,7 +1,6 @@
 import 'package:crypto_bee/provider/auth_provider.dart';
 import 'package:crypto_bee/view/account/general_setting.dart';
 import 'package:crypto_bee/view/userguild/helpcenter.dart';
-import 'package:crypto_bee/widgets/drawertile.dart';
 import 'package:crypto_bee/x.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -78,16 +77,6 @@ class _NavDrawerState extends ConsumerState<NavDrawer> {
                   SizedBox(
                     height: 24,
                   ),
-                  drawerTile(
-                    Icons.person_outline,
-                    'Profile',
-                  ).onTap(() {
-                    // goto(
-                    //   context,
-                    //   // PersonalProfile.routeName,
-                    //   null,
-                    // );
-                  }),
                   SizedBox(
                     height: 24,
                   ),

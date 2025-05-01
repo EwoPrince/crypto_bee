@@ -39,17 +39,14 @@ class _FullNameState extends ConsumerState<FullName> {
               SizedBox(
                 height: 20.0,
               ),
-              reusableTextField(
-                  'Full Name', namecontroller, Theme.of(context).primaryColor,
-                  () {
-                return null;
-              }),
+              CustomTextField(
+                  labelText: 'Full Name', hintText: '', controller: namecontroller,),
               Spacer(),
               _isLoading
                   ? Loading()
-                  : button(context, 'Update', () {
+                  : CustomButton(name:  'Update', onTap:  () {
                       updateprofile();
-                    }),
+                    }, color: Colors.white,),
               SizedBox(
                 height: 30,
               ),

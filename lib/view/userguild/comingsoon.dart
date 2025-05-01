@@ -25,7 +25,8 @@ class ComingSoon extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Spacer(),
-            button(context, 'See you soon', () {}),
+            CustomButton(
+                        name:  'See you soon', onTap:  () {}, color: Colors.white,),
             SizedBox(
               height: 50,
             ),

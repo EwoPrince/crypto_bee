@@ -1,6 +1,5 @@
 import 'package:crypto_bee/provider/auth_provider.dart';
 import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/email_textfield.dart';
 import 'package:crypto_bee/widgets/loading.dart';
 import 'package:crypto_bee/x.dart';
 import 'package:flutter/material.dart';
@@ -35,9 +34,31 @@ class _ForgortState extends ConsumerState<Forgort> {
               Form(
                 autovalidateMode: AutovalidateMode.always,
                 key: _formKey,
-                child: emailTextField(
-                  'Input your Email',
-                  _emailcontroller,
+                child: TextFormField(
+                  controller: _emailcontroller,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'Enter your email',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                   enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
               ),
               SizedBox(
@@ -45,10 +66,11 @@ class _ForgortState extends ConsumerState<Forgort> {
               ),
               _isLoading
                   ? Loading()
-                  : button(
-                      context,
+                  : CustomButton(
+                    color: Colors.white,
+                    name: 
                       'Reset',
-                      () async {
+                     onTap:  () async {
                         final formValidate = _formKey.currentState?.validate();
 
                         if (!(formValidate!)) {

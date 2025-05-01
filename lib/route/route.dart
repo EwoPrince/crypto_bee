@@ -435,11 +435,11 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: Sendbnb.routeName,
+      path: SendBnb.routeName,
       pageBuilder: (context, state) {
         return CustomTransitionPage(
           key: state.pageKey,
-          child: Sendbnb(),
+          child: SendBnb(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity:

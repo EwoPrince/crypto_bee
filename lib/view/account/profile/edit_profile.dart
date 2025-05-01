@@ -1,55 +1,58 @@
-// ignore_for_file: must_be_immutable
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/view/account/profile/editx/full_name.dart';
-import 'package:crypto_bee/view/account/profile/editx/phone.dart';
-import 'package:crypto_bee/view/dashboard/land.dart';
+// import 'package:crypto_bee/view/account/profile/editx/full_name.dart';
+// import 'package:crypto_bee/view/account/profile/editx/phone.dart';
 import 'package:crypto_bee/widgets/button.dart';
 import 'package:crypto_bee/widgets/loading.dart';
 import 'package:crypto_bee/widgets/textField.dart';
-import 'package:crypto_bee/x.dart';
 
 class Editprofile extends ConsumerStatefulWidget {
-  Editprofile({
-    Key? key,
-  }) : super(key: key);
+  const Editprofile({Key? key}) : super(key: key);
   static const routeName = '/EditProfile';
 
   @override
   ConsumerState<Editprofile> createState() => _EditprofileState();
 }
 
+
 class _EditprofileState extends ConsumerState<Editprofile> {
   bool _isLoading = false;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController namecontroller = TextEditingController();
-  TextEditingController phonenumbercontroller = TextEditingController();
-  TextEditingController usernamecontroller = TextEditingController();
-  TextEditingController whatsupcontroller = TextEditingController();
+  final TextEditingController namecontroller = TextEditingController();
+  final TextEditingController phonenumbercontroller = TextEditingController();
+
+  @override
+  void dispose() {
+    namecontroller.dispose();
+    phonenumbercontroller.dispose();
+    super.dispose();
+  }
 
   updateprofile() async {
     setState(() {
       _isLoading = true;
     });
-    showUpMessage(context, 'Profile Updated', '');
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Profile Updated'),
+    ));
     setState(() {
       _isLoading = false;
     });
-    become(context, Land.routeName, null);
-    // goto(context, EditPicProfile());
+
+      Navigator.pushNamed(context, '/land');
   }
 
   @override
+
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     var user = ref.read(authProvider).user;
     return Scaffold(
       appBar: AppBar(),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(8.0),
+        child: Padding(           
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -61,7 +64,7 @@ class _EditprofileState extends ConsumerState<Editprofile> {
                   fontSize: 52,
                 ),
               ),
-              Container(
+               Container(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Give us some Information about yourself.',
@@ -72,33 +75,38 @@ class _EditprofileState extends ConsumerState<Editprofile> {
                   ),
                 ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20.0,
               ),
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    reusableTextField(
-                      '${user!.name}',
-                      namecontroller,
-                      Theme.of(context).primaryColor,
-                      () {
-                        goto(context, FullName.routeName, null);
+                    CustomTextField(
+                      labelText: 'Full Name',
+                      hintText: user!.name,
+                      controller: namecontroller,
+                      validator: (value) {
                         return null;
                       },
+                      // onTap: () {
+                      //   Navigator.pushNamed(context, FullName.routeName);
+                      // },
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20.0,
                     ),
-                    phoneTextField(
-                      '${user.phone}',
-                      phonenumbercontroller,
-                      Theme.of(context).primaryColor,
-                      () {
-                        goto(context, Phone.routeName, null);
+                    CustomTextField(
+                      labelText: 'Phone number',
+                      hintText: user.phone,
+                      controller: phonenumbercontroller,
+                      validator: (value) {
                         return null;
                       },
+                      // readOnly: true,
+                      // onTap: () {
+                      //   Navigator.pushNamed(context, Phone.routeName);
+                      // },
                     ),
                   ],
                 ),
@@ -107,11 +115,15 @@ class _EditprofileState extends ConsumerState<Editprofile> {
                 height: 70.0,
               ),
               _isLoading
-                  ? Loading()
-                  : button(context, 'Done', () {
-                      updateprofile();
-                    }),
-              SizedBox(
+                  ? const Loading()
+                  : Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child:SizedBox(
+                      width: double.infinity,
+                      child: CustomButton(
+                          name: 'Done',
+                          onTap: updateprofile,
+                          color: Theme.of(context).primaryColor),
+                    )),
+              const SizedBox(
                 height: 30,
               ),
             ],

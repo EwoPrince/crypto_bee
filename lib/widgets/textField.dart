@@ -1,247 +1,55 @@
 import 'package:flutter/material.dart';
 
-TextFormField reusableTextField(
-  String text,
-  TextEditingController controller,
-  Color? color,
-  VoidCallback? tap(),
-) {
-  return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "field is required";
-        }
-        return null;
-      },
-      autocorrect: true,
-      onTap: tap,
-      controller: controller,
-      textInputAction: TextInputAction.done,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 16,
-      ),
-      decoration: InputDecoration(
-        labelText: text,
-        hintText: text,
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color!),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // focusedBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // disabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: Colors.red),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-      ),
-      keyboardType: TextInputType.text);
-}
+import 'package:flutter/material.dart';
+class CustomTextField extends StatelessWidget {
+  final String labelText;
+  final String hintText;
+  final TextEditingController controller;
+  final TextInputType keyboardType;
+  final Widget? prefixIcon;
+  final String? Function(String?)? validator;
+  final bool obscureText;
+  final int? maxLines;
+  final int? minLines;
+  
+  const CustomTextField({
+    Key? key,
+    required this.labelText,
+    required this.hintText,
+    required this.controller,
+    this.keyboardType = TextInputType.text,
+    this.prefixIcon,
+    this.validator,
+    this.obscureText = false,
+    this.maxLines,
+    this.minLines,
+  }) : super(key: key);
 
-TextFormField expandableTextField(
-  String text,
-  Color? color,
-  TextEditingController controller,
-) {
-  return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "field is required";
-        }
-        return null;
-      },
-      autocorrect: true,
-      //  autofocus: true,
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
       controller: controller,
-      minLines: 1,
-      maxLines: 20,
-      textInputAction: TextInputAction.done,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 16,
-      ),
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      maxLines: maxLines,
+      minLines: minLines,
+      validator: validator,
       decoration: InputDecoration(
-        labelText: text,
-        hintText: text,
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color!),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // focusedBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // disabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: Colors.red),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-      ),
-      keyboardType: TextInputType.text);
-}
-
-TextFormField postViewTextField(
-    String text, TextEditingController controller, Widget prefix) {
-  return TextFormField(
-      autocorrect: true,
-      controller: controller,
-      minLines: 1,
-      maxLines: 5,
-      textInputAction: TextInputAction.done,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 16,
-      ),
-      decoration: InputDecoration(
-        prefixIcon: prefix,
-        labelText: text,
-        hintText: text,
-        helperStyle: TextStyle(
-          fontSize: 16,
+        labelText: labelText,
+        labelStyle: const TextStyle(color: Colors.grey),
+        hintText: hintText,
+        prefixIcon: prefixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
         ),
-        labelStyle: TextStyle(
-          fontSize: 16,
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).primaryColor,
+          ),
+          borderRadius: BorderRadius.circular(10.0),
         ),
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(
-        //     color: Colors.green.shade300,
-        //   ),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // focusedBorder: OutlineInputBorder(
-        //   borderSide: BorderSide( color: Colors.green.shade300,),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // disabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: Colors.red),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
       ),
-      keyboardType: TextInputType.text);
-}
-
-TextFormField phoneTextField(
-  String text,
-  TextEditingController controller,
-  Color? color,
-  Function? tap(),
-) {
-  return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "phone number is required";
-        }
-        return null;
-      },
-      onTap: tap,
-      //  autofocus: true,
-      controller: controller,
-      textInputAction: TextInputAction.done,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 16,
-      ),
-      decoration: InputDecoration(
-        labelText: text,
-        hintText: text,
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color!),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // focusedBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // disabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: Colors.red),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-      ),
-      keyboardType: TextInputType.phone);
-}
-
-TextFormField transferTextField(
-  Widget icon,
-  String text,
-  TextEditingController controller,
-  Color? color,
-  Function? tap(),
-) {
-  return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Amount?";
-        }
-        return null;
-      },
-      onTap: tap,
-      //  autofocus: true,
-      controller: controller,
-      textInputAction: TextInputAction.done,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 16,
-      ),
-      decoration: InputDecoration(
-        labelText: text,
-        hintText: text,
-        prefixIcon: icon,
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color!),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // focusedBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // disabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: Colors.red),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-      ),
-      keyboardType: TextInputType.number);
-}
-
-
-
-
-TextFormField moneyTextField(
-  String text,
-  TextEditingController controller,
-  Color? color,
-  Function? tap(),
-) {
-  return TextFormField(
-      validator: (value) {
-        if (value!.isEmpty) {
-          return "Amount is required";
-        }
-        return null;
-      },
-      onTap: tap,
-       autofocus: false,
-      controller: controller,
-      textInputAction: TextInputAction.done,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 16,
-      ),
-      decoration: InputDecoration(
-        labelText: text,
-        hintText: text,
-        // enabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color!),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // focusedBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: color),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-        // disabledBorder: OutlineInputBorder(
-        //   borderSide: BorderSide(color: Colors.red),
-        //   borderRadius: BorderRadius.circular(10),
-        // ),
-      ),
-      keyboardType: TextInputType.number);
+      cursorColor: Theme.of(context).primaryColor,
+    );
+  }
 }

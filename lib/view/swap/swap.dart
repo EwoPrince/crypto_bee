@@ -167,10 +167,11 @@ class _SendbtcState extends ConsumerState<Swapcoin> {
                 ? const Loading()
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: button(
-                      context,
+                    child: CustomButton(
+                        name: 
                       'Verify',
-                      _verify,
+                     onTap:  _verify,
+                        color: Theme.of(context).primaryColor,
                     ),
                   ),
             const SizedBox(height: 30),
@@ -237,16 +238,21 @@ class _SendbtcState extends ConsumerState<Swapcoin> {
   }
 
   Widget _buildAmountTextField() {
-    return transferTextField(
-      SizedBox.shrink(),
-      'Recovery Amount',
-      _amountController,
-      Theme.of(context).primaryColor,
-      () {
-        return null;
-      },
-    );
-  }
+    return   CustomTextField(
+                labelText: 'Recovery Amount',
+                hintText: 'Enter Recovery Amount in Dollars',
+                controller: _amountController,
+                keyboardType: TextInputType.number,
+                prefixIcon: const Icon(Icons.dialpad),
+                maxLines: 1,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Enter Recovery Amount in Dollars';
+                  }
+                  return null;
+                },
+              );
+      }
 
   Widget _buildswapButtons() {
     return Wrap(

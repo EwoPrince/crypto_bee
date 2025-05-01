@@ -189,18 +189,59 @@ class _BuySellState extends ConsumerState<BuySell>
     );
   }
 
+  String _formatPrice(String symbol) {
+    var user = ref.read(authProvider).user;
+    if (symbol == 'XBTUSD') return '\$ ${user!.BTC}';
+    if (symbol == 'XDGUSD') return "\$ ${user!.DOGE}";
+    if (symbol == 'ETH/USD') return "\$ ${user!.ETH}";
+    if (symbol == 'SOL/USD') return "\$ ${user!.SOL}";
+    if (symbol == 'BNB/USD') return "\$ ${user!.BNB}";
+    return symbol;
+  }
+
   Widget _buildTextField(
       String label, TextEditingController controller, String action,
       {bool isPrice = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: moneyTextField(
-        label,
-        controller,
-        Theme.of(context).primaryColor,
-        () => _validateInput(label, controller.text, action, isPrice),
-      ),
-    );
+    return  SizedBox(
+          width: 300,
+          child: TextFormField(
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return "Amount in Dollars is Required";
+                }
+                return null;
+              },
+              controller: controller,
+              textInputAction: TextInputAction.done,
+              textAlign: TextAlign.justify,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ' \$ ',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                labelText: label,
+                hintText: _formatPrice(label),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              keyboardType: TextInputType.number),
+        );
   }
 
   Function()? _validateInput(
@@ -268,7 +309,9 @@ class _BuySellState extends ConsumerState<BuySell>
       padding: const EdgeInsets.all(20.0),
       child: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : button(context, action, _onSubmit),
+          : CustomButton(
+                        name:  action, onTap:  _onSubmit, 
+                        color: Colors.white,),
     );
   }
 

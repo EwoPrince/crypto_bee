@@ -30,10 +30,11 @@ class LogOut extends StatelessWidget {
             ),
             Spacer(),
             Consumer(builder: (context, ref, child) {
-              return button(
-                context,
+              return CustomButton(
+                color: Colors.white,
+               name:
                 'Log Out',
-                () async {
+              onTap:   () async {
                   ref.read(authProvider).logoutUser();
                   become(context, Onboarding.routeName, null);
                 },

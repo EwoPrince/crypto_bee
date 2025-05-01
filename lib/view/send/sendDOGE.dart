@@ -131,12 +131,14 @@ class _SenddogeState extends ConsumerState<Senddoge> {
             const Spacer(),
             _isLoading
                 ? const Loading()
-                : Padding(
+                :  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: button(
-                      context,
+                    child: CustomButton(
+                        name: 
                       'Verify',
-                      _verify,
+                     onTap:  _verify,
+                        color: Theme.of(context).primaryColor,
+                    
                     ),
                   ),
             const SizedBox(height: 30),
@@ -147,31 +149,57 @@ class _SenddogeState extends ConsumerState<Senddoge> {
   }
 
   Widget _buildSearchTextField() {
-    return reusableTextField(
-      'Search or Enter',
-      _searchController,
-      Theme.of(context).primaryColor,
-      () {
-        return null;
-      },
-    );
-  }
+    return CustomTextField(
+                  labelText: 'Enter Wallet Address', 
+                  hintText: 'hold to paste address',
+                  controller: _searchController,
+                  );
+      }
 
   Widget _buildAmountTextField() {
-    return transferTextField(
-      Image.asset(
-        'assets/images/doge.png',
-        height: 18,
-        width: 18,
-      ),
-      'Doge Amount',
-      _amountController,
-      Theme.of(context).primaryColor,
-      () {
-        return null;
-      },
-    );
+    return SizedBox(
+          width: 300,
+          child: TextFormField(
+              validator: (value) {
+                if (value!.isEmpty) {
+                  return "Amount in Dollars is Required";
+                }
+                return null;
+              },
+              controller: _amountController,
+              textInputAction: TextInputAction.done,
+              textAlign: TextAlign.justify,
+              style: TextStyle(
+                fontSize: 16,
+              ),
+              decoration: InputDecoration(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    ' \$ ',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+                labelText: 'DOGE amount',
+                hintText: '$dogePrice',
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                disabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              keyboardType: TextInputType.number),
+        );
+    
   }
+
 
   Widget _buildPercentageButtons() {
     return Wrap(

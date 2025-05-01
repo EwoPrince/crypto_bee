@@ -97,7 +97,10 @@ class _TradeTileState extends ConsumerState<TradeTile> {
                 children: [
                   SizedBox(
                     width: 170,
-                    child: button(context, 'View Chart', () {
+                    child: CustomButton(
+                        color: Theme.of(context).primaryColor,
+                        name:  'View Chart',
+                        onTap: () {
                       goto(
                         context,
                         Stake.routeName,
@@ -108,7 +111,10 @@ class _TradeTileState extends ConsumerState<TradeTile> {
                   if (widget.trade.withdraw == false)
                     SizedBox(
                       width: 150,
-                      child: button(context, 'End Trade', () async {
+                      child: CustomButton(
+                        color: Theme.of(context).primaryColor,
+                        name:  'End Trade',
+                        onTap: () async {
                         await TransferService.EndTrade(
                           context,
                           _getProfit(widget.trade),

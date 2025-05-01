@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:crypto_bee/provider/auth_provider.dart';
 import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/email_textfield.dart';
 import 'package:crypto_bee/widgets/loading.dart';
 import 'package:crypto_bee/x.dart';
 
@@ -36,19 +35,42 @@ class _ResetPassState extends State<ResetPass> {
               Form(
                 autovalidateMode: AutovalidateMode.always,
                 key: _formKey,
-                child: emailTextField(
-                  'confirm your Email',
-                  _emailcontroller,
+                child:  TextFormField(
+                  controller: _emailcontroller,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    hintText: 'Enter your email',
+                    prefixIcon: const Icon(Icons.email_outlined),
+                   enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(
+                      ),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
               ),
               Spacer(),
               _isLoading
                   ? Loading()
                   : Consumer(builder: (context, ref, child) {
-                      return button(
-                        context,
+                      return CustomButton(
+                        color: Colors.white,
+                        name: 
                         'Verify',
-                        () async {
+                      onTap:   () async {
                           final formValidate =
                               _formKey.currentState?.validate();
                           if (!(formValidate!)) {

@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      theme: FlexColorScheme.light(
+      theme: FlexColorScheme.dark(
         scheme: FlexScheme.amber,
         useMaterial3: true,
         swapLegacyOnMaterial3: true,

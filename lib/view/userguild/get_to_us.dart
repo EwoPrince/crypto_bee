@@ -62,17 +62,17 @@ class _GetToUsState extends State<GetToUs> {
                     const SizedBox(height: 50.0),
                     Form(
                       key: _formKey,
-                      child: expandableTextField(
-                        'words words words words words words...',
-                        Theme.of(context).primaryColor,
-                        messagecontroller,
-                      ),
+                      child:   CustomTextField(
+                  labelText: 'Please input your Message', hintText: '', controller: messagecontroller,),
+                      
+                      
                     ),
                     const SizedBox(height: 50.0),
-                    button(
-                      context,
+                   CustomButton(
+                    color: Colors.white,
+                        name: 
                       'Send Message',
-                      () async {
+                    onTap:   () async {
                         final formValidate = _formKey.currentState?.validate();
 
                         if (!(formValidate!)) {

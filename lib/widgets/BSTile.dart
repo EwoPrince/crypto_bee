@@ -1,64 +1,74 @@
 import 'package:flutter/material.dart';
 
-Widget BSTile(
-  BuildContext context,
-  String? image,
-  String name,
-  String describtion,
-  bool top,
-  bool buttom,
-) {
-  final size = MediaQuery.of(context).size;
-  return Container(
-    decoration: BoxDecoration(
-      borderRadius: top
-          ? BorderRadius.only(
-              topLeft: Radius.circular(30),
-              topRight: Radius.circular(30),
-            )
-          : buttom
-              ? BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                )
-              : null,
-      color: Theme.of(context).colorScheme.secondaryContainer,
-    ),
-    width: size.width - 13,
-    padding: EdgeInsets.all(10),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        if (image!.isNotEmpty)
-          Image.asset(
-            image,
-            height: 40,
-            width: 40,
-          ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+class BottomsheetTile extends StatelessWidget {
+  final String image;
+  final String name;
+  final String description;
+  final bool top;
+  final bool bottom;
+  final VoidCallback onTap;
+  final Color color;
+  final IconData? icon;
+
+  const BottomsheetTile({
+    Key? key,
+    required this.image,
+    required this.name,
+    required this.description,
+    this.top = false,
+    this.bottom = false,
+    required this.onTap,
+    required this.color,
+    this.icon,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    BorderRadius? borderRadius;
+    if (top) {
+      borderRadius = const BorderRadius.only(
+        topLeft: Radius.circular(30),
+        topRight: Radius.circular(30),
+      );
+    } else if (bottom) {
+      borderRadius = const BorderRadius.only(
+        bottomLeft: Radius.circular(30),
+        bottomRight: Radius.circular(30),
+      );
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          color: color,
+        ),
+        width: size.width,
+        padding: const EdgeInsets.all(10),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              name,
-              style: Theme.of(context).textTheme.labelLarge,
+            Image.asset(
+              image,
+              height: 40,
+              width: 40,
             ),
-            SizedBox(
-              width: size.width * 0.65,
-              child: Text(
-                describtion,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 3,
-                softWrap: true,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: Theme.of(context).textTheme.labelLarge),
+                SizedBox(
+                  width: size.width * 0.65,
+                  child: Text(description, overflow: TextOverflow.ellipsis, maxLines: 3, softWrap: true, style: Theme.of(context).textTheme.bodySmall),
+                ),
+              ],
             ),
+            if (icon != null) Icon(icon, size: 28),
           ],
         ),
-        Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 28,
-        ),
-      ],
-    ),
-  );
+      ),
+    );
+  }
 }
