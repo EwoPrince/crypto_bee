@@ -21,10 +21,13 @@ Future<void> main() async {
   await WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: FirebaseOptions(
-  apiKey: "AIzaSyBDFSPir71sTUPyU0_mjWZRPo2jIzzGgu4",
-  appId: "1:855278277443:web:025d973757895b2b1855f6",
-  messagingSenderId: "855278277443",
-  projectId: "swampthevotedamn",
+  apiKey: "AIzaSyDa3zTQbind8lB55mjlStvZ3ywM4v-qgAM",
+  authDomain: "cryptobeaming.firebaseapp.com",
+  projectId: "cryptobeaming",
+  storageBucket: "cryptobeaming.firebasestorage.app",
+  messagingSenderId: "965797570752",
+  appId: "1:965797570752:web:7d01566d3d18e8268aa525",
+  measurementId: "G-T26M3679S8"
     ),
   );
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then(
@@ -40,7 +43,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      theme: FlexColorScheme.dark(
+      theme: FlexColorScheme.light(
         scheme: FlexScheme.amber,
         useMaterial3: true,
         swapLegacyOnMaterial3: true,
