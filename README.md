@@ -1,4 +1,4 @@
-# crypto_bee
+# crypto_beam
 
 A new Flutter project.
 

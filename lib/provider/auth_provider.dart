@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto_bee/model/user.dart';
+import 'package:crypto_beam/model/user.dart';
 import 'package:firebase_auth/firebase_auth.dart' as x;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

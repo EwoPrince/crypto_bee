@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/textField.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/widgets/textField.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

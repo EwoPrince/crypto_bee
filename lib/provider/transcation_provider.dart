@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:crypto_bee/model/trade.dart';
-import 'package:crypto_bee/model/transcation.dart';
-import 'package:crypto_bee/services/transfer_service.dart';
+import 'package:crypto_beam/model/trade.dart';
+import 'package:crypto_beam/model/transcation.dart';
+import 'package:crypto_beam/services/transfer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

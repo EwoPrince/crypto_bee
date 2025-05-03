@@ -1,6 +1,6 @@
-import 'package:crypto_bee/view/userguild/helpcenter.dart';
-import 'package:crypto_bee/widgets/settingsTile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/userguild/helpcenter.dart';
+import 'package:crypto_beam/widgets/settingsTile.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 
 class PrivacyTips extends StatefulWidget {

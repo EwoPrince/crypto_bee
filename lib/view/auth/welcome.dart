@@ -1,6 +1,6 @@
-import 'package:crypto_bee/states/verified_state.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/states/verified_state.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 
 // ignore: camel_case_types
@@ -25,7 +25,7 @@ class _WelcomeState extends State<Welcome> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
-                'Welcome to the cryptobee',
+                'Welcome to the cryptoBeam',
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
                   fontSize: 24,
@@ -36,7 +36,43 @@ class _WelcomeState extends State<Welcome> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
-                'At cryptobee, we specialize in maximizing your investments through strategic crypto asset management. Our mission is to provide unparalleled opportunities in the fast-evolving world of digital currencies. With a commitment to transparency, security, and innovation, we empower our clients to achieve their financial goals with confidence.',
+                'You\'re all set to take control of your crypto journey.',
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                'With Crypto Beam, you can:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w300,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                '🔐 Securely manage your wallet (non-custodial – only you control your keys)',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                '🔄 Instantly trade crypto with ease',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                '📊 Track your portfolio and transactions in real time',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                 ),
@@ -44,7 +80,7 @@ class _WelcomeState extends State<Welcome> {
             ),
             SizedBox(height: 30),
          CustomButton(
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                     name: 
               'Done',
              onTap: () {

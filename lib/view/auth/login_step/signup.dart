@@ -1,11 +1,11 @@
 // ignore_for_file: must_be_immutable
 
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/view/auth/login_step/Xfullname.dart';
-import 'package:crypto_bee/view/auth/login_step/signin.dart';
-import 'package:crypto_bee/view/userguild/tac.dart'; // Make sure this is imported.
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/view/auth/login_step/Xfullname.dart';
+import 'package:crypto_beam/view/auth/login_step/signin.dart';
+import 'package:crypto_beam/view/userguild/tac.dart'; // Make sure this is imported.
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart'; // Make sure this is imported.
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -89,104 +89,126 @@ class _SignupState extends ConsumerState<Signup> {
                   style: TextStyle(color: Colors.grey),)
                 ),const SizedBox(height: 30),
                 TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'Enter your email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                   enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.grey.shade800,
-                      ),
-                    ),
-                      focusedBorder: UnderlineInputBorder(borderSide: BorderSide(
-                      ),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: !_passwordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    hintText: 'Enter your password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(_passwordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility),
-                      onPressed: () {
-                       if (mounted) {
-                    setState(() {
-                     _passwordVisible = !_passwordVisible;
-                       });
-                        }
-                      },
-                    ),
-                  
-                      enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.grey,
-            ),
-        ),
-        focusedBorder:  UnderlineInputBorder(borderSide: BorderSide(
-                  color: Theme.of(context).primaryColor
-        )),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  obscureText: !_confirmPasswordVisible,
-                  decoration: InputDecoration(
-                    labelText: 'Confirm Password',
-                    hintText: 'Confirm your password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(_confirmPasswordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility),
-                      onPressed: () {
-                       if (mounted) {
-                       setState(() {
-                     _confirmPasswordVisible = !_confirmPasswordVisible;
-                       });
-                        }
-                      },
-                    ),
-                      enabledBorder: UnderlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          labelStyle: TextStyle(color: Colors.grey),
+                          hintText: 'Enter your email',
+                          prefixIcon: const Icon(Icons.email_outlined),
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                           focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         color: Theme.of(context).primaryColor,
                       ),
+                      borderRadius: BorderRadius.circular(10.0),
                     ),
-                  ),
-                  validator: (value) {
+                         ),
+                        validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please confirm your password';
                     }
-                    if (value != _passwordController.text) {
+                    if (value != _emailController.text) {
                       return 'Passwords do not match';
+                    }
+                    return null;
+                  },
+                       cursorColor: Theme.of(context).primaryColor,
+                       
+                      ),
+                const SizedBox(height: 20),
+                TextFormField(
+                        textInputAction: TextInputAction.done,
+                        keyboardType: TextInputType.visiblePassword,
+                        controller: _passwordController,
+                        autofocus: false,
+                        obscureText: _passwordVisible,
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: _passwordVisible
+                                ? const Icon(Icons.visibility_off)
+                                : Icon(
+                                    Icons.visibility,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                            onPressed: () {
+                              if (mounted) {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              }
+                            },
+                          ),
+                          labelText: "Password",
+                           labelStyle: TextStyle(color: Colors.grey),
+                          hintText: 'Enter your password',
+                          
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                           focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                        ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                                TextFormField(
+                        textInputAction: TextInputAction.done,
+                        keyboardType: TextInputType.visiblePassword,
+                        controller: _passwordController,
+                        autofocus: false,
+                        obscureText: _confirmPasswordVisible,
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                        cursorColor: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: _confirmPasswordVisible
+                                ? const Icon(Icons.visibility_off)
+                                : Icon(
+                                    Icons.visibility,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                            onPressed: () {
+                              if (mounted) {
+                                setState(() {
+                                  _confirmPasswordVisible = !_confirmPasswordVisible;
+                                });
+                              }
+                            },
+                          ),
+                          labelText: "Confirm password",
+                           labelStyle: TextStyle(color: Colors.grey),
+                          hintText: 'Confirm your password',
+                          
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10.0)),
+                           focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                        ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please confirm your password';
                     }
                     return null;
                   },
@@ -250,11 +272,3 @@ class _SignupState extends ConsumerState<Signup> {
   }
 
   }
-  extension on Widget {
-  onTap(Function() onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: this,
-    );
-  }
-}

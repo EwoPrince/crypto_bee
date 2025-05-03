@@ -1,6 +1,6 @@
 {
-    "name": "crypto_bee",
-    "short_name": "crypto_bee",
+    "name": "crypto_beam",
+    "short_name": "crypto_beam",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#000000",

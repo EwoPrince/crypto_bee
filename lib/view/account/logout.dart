@@ -1,9 +1,9 @@
-import 'package:crypto_bee/view/auth/onboarding.dart';
+import 'package:crypto_beam/view/auth/onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/x.dart';
 
 class LogOut extends StatelessWidget {
   const LogOut({Key? key}) : super(key: key);

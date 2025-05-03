@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:crypto_bee/view/account/resetPass.dart';
-import 'package:crypto_bee/widgets/settingsTile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/account/resetPass.dart';
+import 'package:crypto_beam/widgets/settingsTile.dart';
+import 'package:crypto_beam/x.dart';
 
 class SecurityScreen extends StatefulWidget {
   const SecurityScreen({Key? key}) : super(key: key);

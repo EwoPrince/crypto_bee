@@ -1,8 +1,8 @@
-import 'package:crypto_bee/view/dashboard/drawer.dart';
-import 'package:crypto_bee/view/dashboard/explore.dart';
-import 'package:crypto_bee/view/dashboard/wallet.dart';
-import 'package:crypto_bee/view/dashboard/history.dart';
-import 'package:crypto_bee/view/stake/stake.dart';
+import 'package:crypto_beam/view/dashboard/drawer.dart';
+import 'package:crypto_beam/view/dashboard/explore.dart';
+import 'package:crypto_beam/view/dashboard/wallet.dart';
+import 'package:crypto_beam/view/dashboard/history.dart';
+import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

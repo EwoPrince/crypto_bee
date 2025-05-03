@@ -1,6 +1,6 @@
-import 'package:crypto_bee/states/verified_state.dart';
-import 'package:crypto_bee/view/dashboard/land.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/states/verified_state.dart';
+import 'package:crypto_beam/view/dashboard/land.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 
 class Networkiss extends StatefulWidget {
@@ -23,14 +23,18 @@ class _NetworkissState extends State<Networkiss> {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/network.gif',
-                fit: BoxFit.fill,
-              ).onDoubleTap(() {
-                setState(() {
-                  offline = !offline;
-                });
-              }),
+              GestureDetector(
+                onDoubleTap: () {
+                  setState(() {
+                    offline = !offline;
+                  });
+                },
+                child: Image.asset(
+                  'assets/network.gif',
+                  fit: BoxFit.fill,
+                ),
+
+              ),
               SizedBox(
                 height: 100,
               ),

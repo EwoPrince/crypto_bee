@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:crypto_bee/view/account/profile/edit_profile.dart';
-import 'package:crypto_bee/view/account/account_information.dart';
-import 'package:crypto_bee/view/account/deactivate.dart';
-import 'package:crypto_bee/view/account/logout.dart';
-import 'package:crypto_bee/widgets/settingsTile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/account/profile/edit_profile.dart';
+import 'package:crypto_beam/view/account/account_information.dart';
+import 'package:crypto_beam/view/account/deactivate.dart';
+import 'package:crypto_beam/view/account/logout.dart';
+import 'package:crypto_beam/widgets/settingsTile.dart';
+import 'package:crypto_beam/x.dart';
 
 class YourAccount extends StatefulWidget {
   const YourAccount({Key? key}) : super(key: key);

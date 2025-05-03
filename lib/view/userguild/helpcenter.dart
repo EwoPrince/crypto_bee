@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto_bee/widgets/loading.dart';
+import 'package:crypto_beam/widgets/loading.dart';
 import 'package:flutter/material.dart';
 
 class helpcenter extends StatelessWidget {

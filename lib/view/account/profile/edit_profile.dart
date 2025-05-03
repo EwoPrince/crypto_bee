@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:crypto_bee/provider/auth_provider.dart';
-// import 'package:crypto_bee/view/account/profile/editx/full_name.dart';
-// import 'package:crypto_bee/view/account/profile/editx/phone.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/widgets/textField.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+// import 'package:crypto_beam/view/account/profile/editx/full_name.dart';
+// import 'package:crypto_beam/view/account/profile/editx/phone.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/widgets/textField.dart';
 
 class Editprofile extends ConsumerStatefulWidget {
   const Editprofile({Key? key}) : super(key: key);

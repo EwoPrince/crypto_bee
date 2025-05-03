@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/view/account/profile/edit_profile.dart';
-import 'package:crypto_bee/view/account/profile/editx/full_name.dart';
-import 'package:crypto_bee/view/account/profile/editx/phone.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/view/account/profile/edit_profile.dart';
+import 'package:crypto_beam/view/account/profile/editx/full_name.dart';
+import 'package:crypto_beam/view/account/profile/editx/phone.dart';
+import 'package:crypto_beam/x.dart';
 
 class AccountInformation extends ConsumerStatefulWidget {
   const AccountInformation({Key? key});

@@ -1,5 +1,5 @@
-import 'package:crypto_bee/model/transcation.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/model/transcation.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

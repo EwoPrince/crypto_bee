@@ -1,9 +1,9 @@
-import 'package:crypto_bee/model/trade.dart';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/services/transfer_service.dart';
-import 'package:crypto_bee/view/stake/stake.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/x.dart'; // Assuming this contains utility functions like `goto` and `readTimestamp`
+import 'package:crypto_beam/model/trade.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/services/transfer_service.dart';
+import 'package:crypto_beam/view/stake/stake.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/x.dart'; // Assuming this contains utility functions like `goto` and `readTimestamp`
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

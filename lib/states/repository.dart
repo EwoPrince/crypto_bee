@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:crypto_bee/candlestick/models/candle.dart';
-import 'package:crypto_bee/view/stake/stake.dart';
+import 'package:crypto_beam/candlestick/models/candle.dart';
+import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:logger/logger.dart';

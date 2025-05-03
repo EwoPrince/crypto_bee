@@ -1,9 +1,9 @@
-import 'package:crypto_bee/view/Recieve/RecieveBTC.dart';
-import 'package:crypto_bee/view/Recieve/RecieveDoge.dart';
-import 'package:crypto_bee/view/Recieve/RecieveETH.dart';
-import 'package:crypto_bee/view/Recieve/RecieveSOL.dart';
-import 'package:crypto_bee/widgets/BSTile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/Recieve/RecieveBTC.dart';
+import 'package:crypto_beam/view/Recieve/RecieveDoge.dart';
+import 'package:crypto_beam/view/Recieve/RecieveETH.dart';
+import 'package:crypto_beam/view/Recieve/RecieveSOL.dart';
+import 'package:crypto_beam/widgets/BSTile.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 
 void showRecieveModalBottomSheet(BuildContext context) {

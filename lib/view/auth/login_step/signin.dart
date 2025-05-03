@@ -1,10 +1,9 @@
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/states/verified_state.dart';
-import 'package:crypto_bee/view/auth/login_step/signup.dart';
-import 'package:crypto_bee/view/auth/forgot.dart';
-import 'package:crypto_bee/view/userguild/tac.dart';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/states/verified_state.dart';
+import 'package:crypto_beam/view/auth/login_step/signup.dart';
+import 'package:crypto_beam/view/auth/forgot.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart'; // Make sure this is imported.
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart'; // Make sure this is imported.
@@ -77,7 +76,7 @@ class _SigninState extends ConsumerState<Signin> {
                 Center(
 
                   child: Text(
-                  "Log in to your Account'",
+                  "Log in to your Account.",
                   style: TextStyle(color: Colors.grey),)
                 ),const SizedBox(height: 30),
                 Form(
@@ -161,10 +160,7 @@ class _SigninState extends ConsumerState<Signin> {
                         ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                      return 'Please enter your password';
                     }
                     return null;
                   },

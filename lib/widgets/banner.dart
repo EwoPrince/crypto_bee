@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:crypto_bee/widgets/button.dart';
+import 'package:crypto_beam/widgets/button.dart';
 
 class BannerLook extends StatelessWidget {
   final String imageUrl;

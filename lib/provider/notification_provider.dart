@@ -1,7 +1,7 @@
 // import 'package:flutter/material.dart';
 // import 'package:hooks_riverpod/hooks_riverpod.dart';
-// import 'package:crypto_bee/model/chat_contact.dart';
-// import 'package:crypto_bee/services/game_services.dart';
+// import 'package:crypto_beam/model/chat_contact.dart';
+// import 'package:crypto_beam/services/game_services.dart';
 
 // final notificationProvider =
 //     ChangeNotifierProvider<NotificationProviders>((ref) => NotificationProviders());

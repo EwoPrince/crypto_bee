@@ -2,10 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter/services.dart';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/widgets/textField.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/widgets/textField.dart';
 class Phone extends ConsumerStatefulWidget {
   const Phone({super.key});
   static const routeName = '/EditPhoneNumber';

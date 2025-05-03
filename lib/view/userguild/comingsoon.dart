@@ -1,4 +1,4 @@
-import 'package:crypto_bee/widgets/button.dart';
+import 'package:crypto_beam/widgets/button.dart';
 import 'package:flutter/material.dart';
 
 class ComingSoon extends StatelessWidget {

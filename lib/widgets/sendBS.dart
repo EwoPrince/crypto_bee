@@ -1,9 +1,9 @@
-import 'package:crypto_bee/view/send/sendBTC.dart';
-import 'package:crypto_bee/view/send/sendDOGE.dart';
-import 'package:crypto_bee/view/send/sendETH.dart';
-import 'package:crypto_bee/view/send/sendSOL.dart';
-import 'package:crypto_bee/widgets/BSTile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/send/sendBTC.dart';
+import 'package:crypto_beam/view/send/sendDOGE.dart';
+import 'package:crypto_beam/view/send/sendETH.dart';
+import 'package:crypto_beam/view/send/sendSOL.dart';
+import 'package:crypto_beam/widgets/BSTile.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 
 // Data structure for send currencies

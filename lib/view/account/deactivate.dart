@@ -1,11 +1,11 @@
-import 'package:crypto_bee/view/auth/onboarding.dart';
+import 'package:crypto_beam/view/auth/onboarding.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/widgets/textField.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/widgets/textField.dart';
 class Deactivate extends StatefulWidget {
   const Deactivate({Key? key}) : super(key: key);
 

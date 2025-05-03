@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:crypto_bee/view/account/profile/edit_pic_profile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/account/profile/edit_pic_profile.dart';
+import 'package:crypto_beam/x.dart';
 
 class PicProfileView extends StatefulWidget {
   final snap;

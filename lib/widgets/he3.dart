@@ -1,5 +1,5 @@
-import 'package:crypto_bee/widgets/recieveBS.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/widgets/recieveBS.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 

@@ -1,4 +1,4 @@
-import 'package:crypto_bee/widgets/banner.dart';
+import 'package:crypto_beam/widgets/banner.dart';
 
 
 import 'package:flutter/material.dart';

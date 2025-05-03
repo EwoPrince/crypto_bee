@@ -1,4 +1,4 @@
-import 'package:crypto_bee/candlestick/models/candle.dart';
+import 'package:crypto_beam/candlestick/models/candle.dart';
 
 class CandleTickerModel {
   final int eventTime;

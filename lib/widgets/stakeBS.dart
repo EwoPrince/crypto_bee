@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/services/transfer_service.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/widgets/textField.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/services/transfer_service.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/widgets/textField.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

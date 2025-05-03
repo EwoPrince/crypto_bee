@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:crypto_bee/view/auth/login_step/signin.dart';
-import 'package:crypto_bee/view/auth/login_step/signup.dart';
-import 'package:crypto_bee/widgets/button.dart';
-import 'package:crypto_bee/x.dart';
-import 'package:crypto_bee/widgets/column_with_spacing.dart';
+import 'package:crypto_beam/view/auth/login_step/signin.dart';
+import 'package:crypto_beam/view/auth/login_step/signup.dart';
+import 'package:crypto_beam/widgets/button.dart';
+import 'package:crypto_beam/x.dart';
+import 'package:crypto_beam/widgets/column_with_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -1241,7 +1241,7 @@ class _OnboardingState extends State<Onboarding> {
                             ),
                             SizedBox(height: 12),
                             CustomButton(
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                     name:  'Start Trading', onTap:  () {
                               goto(context, Signup.routeName, null);
                             }),

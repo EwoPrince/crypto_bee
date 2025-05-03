@@ -1,5 +1,5 @@
-import 'package:crypto_bee/states/verified_state.dart';
-import 'package:crypto_bee/view/auth/onboarding.dart';
+import 'package:crypto_beam/states/verified_state.dart';
+import 'package:crypto_beam/view/auth/onboarding.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 

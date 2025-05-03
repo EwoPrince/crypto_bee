@@ -1,8 +1,8 @@
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/provider/transcation_provider.dart';
-import 'package:crypto_bee/widgets/he3.dart';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/widgets/transcation_tile.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/provider/transcation_provider.dart';
+import 'package:crypto_beam/widgets/he3.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/widgets/transcation_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

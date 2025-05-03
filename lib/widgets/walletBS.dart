@@ -1,6 +1,6 @@
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/view/account/logout.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/view/account/logout.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

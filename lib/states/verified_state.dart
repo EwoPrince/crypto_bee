@@ -1,13 +1,13 @@
 import 'dart:math';
-import 'package:crypto_bee/provider/auth_provider.dart';
-import 'package:crypto_bee/view/dashboard/land.dart';
-import 'package:crypto_bee/view/userguild/networkIssuse.dart';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/view/dashboard/land.dart';
+import 'package:crypto_beam/view/userguild/networkIssuse.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:crypto_bee/states/repository.dart';
+import 'package:crypto_beam/states/repository.dart';
 
 class VerifiedState extends ConsumerStatefulWidget {
   const VerifiedState({Key? key}) : super(key: key);

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:crypto_bee/view/userguild/additonal_res.dart';
-import 'package:crypto_bee/view/userguild/privacy_tips.dart';
-import 'package:crypto_bee/view/account/security.dart';
-import 'package:crypto_bee/view/account/yourAccount.dart';
-import 'package:crypto_bee/widgets/settingsTile.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/view/userguild/additonal_res.dart';
+import 'package:crypto_beam/view/userguild/privacy_tips.dart';
+import 'package:crypto_beam/view/account/security.dart';
+import 'package:crypto_beam/view/account/yourAccount.dart';
+import 'package:crypto_beam/widgets/settingsTile.dart';
+import 'package:crypto_beam/x.dart';
 
 class Settingss extends StatefulWidget {
   static const routeName = '/Settings';

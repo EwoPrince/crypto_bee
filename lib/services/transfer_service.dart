@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto_bee/model/trade.dart';
-import 'package:crypto_bee/model/transcation.dart';
-import 'package:crypto_bee/model/user.dart';
-import 'package:crypto_bee/x.dart';
+import 'package:crypto_beam/model/trade.dart';
+import 'package:crypto_beam/model/transcation.dart';
+import 'package:crypto_beam/model/user.dart';
+import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart' as x;

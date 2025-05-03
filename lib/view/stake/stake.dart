@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:crypto_bee/widgets/loading.dart';
-import 'package:crypto_bee/widgets/stakeBS.dart';
+import 'package:crypto_beam/widgets/loading.dart';
+import 'package:crypto_beam/widgets/stakeBS.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:crypto_bee/candlestick/candlesticks.dart';
-import 'package:crypto_bee/candlestick/models/candle.dart';
-import 'package:crypto_bee/candlestick/models/indicator.dart';
-import 'package:crypto_bee/candlestick/utils/indicators/bollinger_bands_indicator.dart';
-import 'package:crypto_bee/candlestick/widgets/toolbar_action.dart';
-import 'package:crypto_bee/states/repository.dart';
+import 'package:crypto_beam/candlestick/candlesticks.dart';
+import 'package:crypto_beam/candlestick/models/candle.dart';
+import 'package:crypto_beam/candlestick/models/indicator.dart';
+import 'package:crypto_beam/candlestick/utils/indicators/bollinger_bands_indicator.dart';
+import 'package:crypto_beam/candlestick/widgets/toolbar_action.dart';
+import 'package:crypto_beam/states/repository.dart';
 
 class Stake extends ConsumerStatefulWidget {
   final String? symbol;
