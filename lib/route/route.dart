@@ -11,6 +11,7 @@ import 'package:crypto_beam/view/asset/solAsset.dart';
 import 'package:crypto_beam/view/auth/login_step/signin.dart';
 import 'package:crypto_beam/view/auth/login_step/signup.dart';
 import 'package:crypto_beam/view/auth/onboarding.dart';
+import 'package:crypto_beam/view/dashboard/market.dart';
 import 'package:crypto_beam/view/send/sendBNB.dart';
 import 'package:crypto_beam/view/send/sendBTC.dart';
 import 'package:crypto_beam/view/send/sendDOGE.dart';
@@ -212,6 +213,22 @@ final GoRouter router = GoRouter(
         return CustomTransitionPage(
           key: state.pageKey,
           child: Land(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: Market.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: Market(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity:

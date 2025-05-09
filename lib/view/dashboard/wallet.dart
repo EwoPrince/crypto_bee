@@ -21,171 +21,157 @@ class Wallet extends ConsumerStatefulWidget {
   ConsumerState<Wallet> createState() => _WalletState();
 }
 
-class _WalletState extends ConsumerState<Wallet> {
+class _WalletState extends ConsumerState<Wallet> 
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     final user = ref.read(authProvider).user;
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(width: 30),
-                GestureDetector(
-                  //this is the wallet button
-                  onTap: () => showWalletBottomSheet(context, ref),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30),
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                    ),
+        padding: const EdgeInsets.all(12),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const SizedBox(width: 30),
+                  Container(
                     padding: const EdgeInsets.all(8),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.wallet,
-                          size: 24,
-                        ),
+                    child: 
                         Text(
-                          " Wallet ",
+                          " My Assets ",
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
-                        const Icon(
-                          Icons.arrow_drop_down_circle_outlined,
-                          size: 18,
+                  ),
+                  IconButton(
+                    onPressed: () => showWalletBottomSheet(context, ref),
+                    icon: const Icon(
+                      Icons.account_circle_rounded,
+                      size: 30,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'Total Assets',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              Row(
+                children: [
+                  Text(
+                  '${user!.dollar} ',
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                  
+              Text(
+                ' USD',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+                ],
+              ),
+              Text(
+                '= ${user.BTC} BTC',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(12), topRight: Radius.circular(12),),
+                ),
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Row(
+                      children: [
+                        Text(
+                          //this is the user name
+                          user.name,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        
+                        Text(
+                          //this is the user name
+                          '*         would you like to begin',
+                    
+                          style: Theme.of(context).textTheme.labelSmall,
                         ),
                       ],
                     ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, Settingss.routeName),
-                  icon: const Icon(
-                    Icons.settings_outlined,
-                    size: 30,
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ActionButton(
+                    icon: Icons.arrow_downward,
+                    label: 'Receive',
+                    onTap: () => showRecieveModalBottomSheet(context),
                   ),
-                ),
-              ],
-            ),
-            Text(
-              'Available Balance',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            Text(
-              numToCurrency(user!.dollar, '2'),
-              style: Theme.of(context).textTheme.headlineLarge,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              //this is the user name
-              user.name,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ActionButton(
-                  icon: Icons.arrow_downward,
-                  label: 'Receive',
-                  onTap: () => showRecieveModalBottomSheet(context),
-                ),
-                ActionButton(
-                  icon: Icons.arrow_upward,
-                  label: 'Send',
-                  onTap: () => showSendModalBottomSheet(context),
-                ),
-                ActionButton(
-                  icon: Icons.stacked_bar_chart_outlined,
-                  label: 'Stake',
-                  onTap: () => Navigator.pushNamed(context, Stake.routeName),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Crypto Asset',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () => Navigator.pushNamed(context, Btcasset.routeName),
-              child: AssetTileWidget(
-                color: Theme.of(context).primaryColor,
-                image: 
-                'assets/images/btc.png',
-              name:   'BTC',
-              amount:   numToCurrency(user.BTC, '2'),
-             asset:    numToCrypto(user.BTC / btcPrice),
-             currentPrice:    numToCurrency(btcPrice, '4'),
-             top:    true,
-            bottom:     false,
+                  ActionButton(
+                    icon: Icons.arrow_upward,
+                    label: 'Send',
+                    onTap: () => showSendModalBottomSheet(context),
+                  ),
+                  ActionButton(
+                    icon: Icons.stacked_bar_chart_outlined,
+                    label: 'Trade',
+                    onTap: () => Navigator.pushNamed(context, Stake.routeName),
+                  ),
+                ],
               ),
-            ),
-            if (user.BNB != 0)
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, Bnbasset.routeName),
-              child: AssetTileWidget(
-                color: Theme.of(context).primaryColor,
-                image: 
-                
-                  'assets/images/bnb.png',
-                name:   'BNB',
-               amount:    numToCurrency(user.BNB, '2'),
-               asset:    numToCrypto(user.BNB / bnbPrice),
-               currentPrice:    numToCurrency(bnbPrice, '4'),
-               top:    false, 
-               bottom: false,),
-              ),
-            if (user.ETH != 0)
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, ETHasset.routeName),
-                child: AssetTileWidget(
-                color: Theme.of(context).primaryColor,
-                image: 
-                
-                  'assets/images/eth.png',
-               name:    'ETH',
-               amount:    numToCurrency(user.ETH, '2'),
-               asset:    numToCrypto(user.ETH / ethPrice),
-               currentPrice:    numToCurrency(ethPrice, '4'),
-               top:    false, bottom:  false,),
-              ),
-            if (user.DOGE != 0)
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, DOGEasset.routeName),
-           child: AssetTileWidget(
-                color: Theme.of(context).primaryColor,
-                image: 
-                
-                  'assets/images/doge.png',
-            name:       'DOGE',
-             amount:      numToCurrency(user.DOGE, '2'),
-              asset:     numToCrypto(user.DOGE / dogePrice),
-              currentPrice:     numToCurrency(dogePrice, '4'),
-             top:      false, bottom:  false,),
-              ),
-            if (user.SOL != 0)
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(context, SOLasset.routeName),
-              child: AssetTileWidget(
-                color: Theme.of(context).primaryColor,
-                image: 
-                
-                  'assets/images/sol.png',
-                 name:  'SOL',
-               amount:    numToCurrency(user.SOL, '2'),
-               asset:    numToCrypto(user.SOL / solPrice),
-               currentPrice:    numToCurrency(solPrice, '4'),
-               top:    false,bottom:  true,),)
-          ],
+              const SizedBox(height: 20),
+              
+              Row(
+                children: [
+                  TextButton(onPressed: () {
+                  _tabController.animateTo(0);}, child: const Text("Account")),
+                  TextButton(
+                      onPressed: () {
+                  _tabController.animateTo(1);}, child: const Text("Asset"))
+                ],
+              ),         
+              const SizedBox(height: 8),
+              ListTile(
+                              style: ListTileStyle.drawer,
+                              title: Text('Funding'),
+                              subtitle: Text(
+                  numToCurrency(user.dollar, '2'),),
+                              trailing: Icon(Icons.arrow_forward ),
+                            ),
+                            
+              ListTile(
+                              style: ListTileStyle.drawer,
+                              title: Text('Unified Trading'),
+                              subtitle: Text(
+                  numToCurrency(user.dollar, '2'),),
+                              trailing: Icon(Icons.arrow_forward ),
+                            ),
+              
+            ],
+          ),
         ),),
     );
   }

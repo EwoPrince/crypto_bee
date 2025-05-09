@@ -265,7 +265,7 @@ class _StakeState extends ConsumerState<Stake> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('cryptobee Stake'),
+        title: const Text('cryptoBeam Stake'),
       ),
       body: Center(
         child: _isSymbolsLoading

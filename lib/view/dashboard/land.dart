@@ -1,5 +1,6 @@
 import 'package:crypto_beam/view/dashboard/drawer.dart';
 import 'package:crypto_beam/view/dashboard/explore.dart';
+import 'package:crypto_beam/view/dashboard/market.dart';
 import 'package:crypto_beam/view/dashboard/wallet.dart';
 import 'package:crypto_beam/view/dashboard/history.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
@@ -23,9 +24,10 @@ class _LandState extends ConsumerState<Land> with WidgetsBindingObserver {
 
   final pages = [
     Explore(),
-    Wallet(),
+    Market(),
     Stake(),
     History(),
+    Wallet(),
   ];
 
   @override
@@ -51,19 +53,24 @@ class _LandState extends ConsumerState<Land> with WidgetsBindingObserver {
               icon: Icon(Icons.home),
             ),
             BottomNavigationBarItem(
-              tooltip: 'Wallet',
-              label: 'Wallet',
-              icon: Icon(Icons.wallet),
+              tooltip: 'Market',
+              label: 'Market',
+              icon: Icon(Icons.bar_chart),
             ),
             BottomNavigationBarItem(
-              tooltip: 'Track',
-              label: 'Track',
+              tooltip: 'Chart',
+              label: 'Chart',
               icon: Icon(Icons.trending_up),
             ),
             BottomNavigationBarItem(
               tooltip: 'History',
               label: 'history',
               icon: Icon(Icons.history),
+            ),
+            BottomNavigationBarItem(
+              tooltip: 'Assets',
+              label: 'Assets',
+              icon: Icon(Icons.wallet),
             ),
           ],
           onTap: (index) {

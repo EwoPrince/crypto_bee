@@ -33,18 +33,24 @@ class _WelcomeState extends State<Welcome> {
               ),
             ),
             SizedBox(height: 12),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'You\'re all set to take control of your crypto journey.',
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+              
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    textAlign: TextAlign.start,
+                    'You\'re all set to take control of your crypto journey.',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
-            ),
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
+                textAlign: TextAlign.start,
                 'With Crypto Beam, you can:',
                 style: TextStyle(
                   fontWeight: FontWeight.w300,
@@ -54,6 +60,7 @@ class _WelcomeState extends State<Welcome> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
+                textAlign: TextAlign.start,
                 '🔐 Securely manage your wallet (non-custodial – only you control your keys)',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
@@ -63,6 +70,7 @@ class _WelcomeState extends State<Welcome> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
+                textAlign: TextAlign.start,
                 '🔄 Instantly trade crypto with ease',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
@@ -72,11 +80,14 @@ class _WelcomeState extends State<Welcome> {
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
+                textAlign: TextAlign.start,
                 '📊 Track your portfolio and transactions in real time',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                 ),
               ),
+            ),
+              ],
             ),
             SizedBox(height: 30),
          CustomButton(

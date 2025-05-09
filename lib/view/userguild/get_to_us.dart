@@ -35,7 +35,7 @@ class _GetToUsState extends State<GetToUs> {
             Container(
               padding: EdgeInsets.all(20),
               child: Text(
-                'Make Complaints and Enquiries about process, products, and services concerning cryptobee.',
+                'Make Complaints and Enquiries about process, products, and services concerning CryptoBeam.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w700,
@@ -69,7 +69,7 @@ class _GetToUsState extends State<GetToUs> {
                     ),
                     const SizedBox(height: 50.0),
                    CustomButton(
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                         name: 
                       'Send Message',
                     onTap:   () async {

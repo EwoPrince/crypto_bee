@@ -30,7 +30,7 @@ class _VerifiedStateState extends ConsumerState<VerifiedState> {
 
   Future<bool> start() async {
     try {
-      await ref.read(authProvider).getCurrentUser(uid);
+      ref.read(authProvider).getCurrentUser(uid);
 
       btcPrice = await repository.getCryptoPrice('bitcoin');
       ethPrice = await repository.getCryptoPrice('ethereum');

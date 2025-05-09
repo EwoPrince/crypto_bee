@@ -131,7 +131,6 @@ class AuthProviders extends ChangeNotifier {
     final CurrentId = await x.FirebaseAuth.instance.currentUser!.uid;
     var transcationId = const Uuid().v1();
     var datePublished = DateTime.now();
-    final mount = double.tryParse(recovery_amount);
     final count = double.tryParse(exchange_amount);
 
     await FirebaseFirestore.instance.collection("users").doc(CurrentId).update(

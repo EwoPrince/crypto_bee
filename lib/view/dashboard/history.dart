@@ -185,14 +185,16 @@ class _HistoryState extends ConsumerState<History>
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          hes3(context),
-          _buildBuyRecieveButton(context),
-        ],
+    return SingleChildScrollView(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            hes3(context),
+            _buildBuyRecieveButton(context),
+          ],
+        ),
       ),
     );
   }
