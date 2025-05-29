@@ -17,7 +17,7 @@ class _RecieveBTCState extends State<RecieveBTC> {
     final size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Recieve BitCoin'),
+        title: Text('Recieve Bitcoin'),
       ),
       body: Container(
         width: size.width,

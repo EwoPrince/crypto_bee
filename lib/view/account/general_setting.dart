@@ -47,7 +47,7 @@ class _SettingssState extends State<Settingss> {
                 context,
                 Icons.privacy_tip_outlined,
                 'Privacy and Safety',
-                'Get tips on how to keep your account secured and what to share on cryptobee.',
+                'Get tips on how to keep your account secured and what to share on cryptobeam.',
               ).onTap(() {
                 goto(
                   context,
@@ -59,7 +59,7 @@ class _SettingssState extends State<Settingss> {
                 context,
                 Icons.menu_outlined,
                 'Additional resources',
-                'Check out other places for helpful information to learn more about cryptobee products and services',
+                'Check out other places for helpful information to learn more about cryptobeam products and services',
               ).onTap(() {
                 goto(
                   context,

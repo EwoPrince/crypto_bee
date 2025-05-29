@@ -67,9 +67,9 @@ class _ForgortState extends ConsumerState<Forgort> {
               _isLoading
                   ? Loading()
                   : CustomButton(
-                    color: Colors.white,
+                    color: Theme.of(context).primaryColor,
                     name: 
-                      'Reset',
+                      'Confirm',
                      onTap:  () async {
                         final formValidate = _formKey.currentState?.validate();
 

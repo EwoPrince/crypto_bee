@@ -1,61 +1,69 @@
-class Transcation {
-  Transcation({
-    required this.transcationId,
-    this.receiver_username,
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class Transaction {
+  Transaction({
+    required this.transactionId,
+    this.title,
     this.receiver_uid,
-    this.receiver_pic,
     this.BTC,
     this.ETH,
     this.DOGE,
     this.SOL,
     this.BNB,
     this.withdraw,
+    this.processing,
+    this.address,
+    this.trade,
     required this.date,
   });
 
-  final String transcationId;
-  String? receiver_username;
+  final String transactionId;
+  String? title;
   String? receiver_uid;
-  String? receiver_pic;
   double? BTC;
   double? ETH;
   double? DOGE;
   double? SOL;
   double? BNB;
   bool? withdraw;
+  bool? processing;
+  bool? trade;
+  String? address;
   final DateTime date;
 
   Map<String, dynamic> toMap() {
     return {
-      'transcationId': transcationId,
-      'receiver_username': receiver_username,
+      'transactionId': transactionId,
+      'title': title,
       'receiver_uid': receiver_uid,
-      'receiver_pic': receiver_pic,
       'BTC': BTC,
       'ETH': ETH,
       'DOGE': DOGE,
       'SOL': SOL,
-      "BNB": BNB,
+      'BNB': BNB,
+      'processing': processing,
       'withdraw': withdraw,
+      'trade': trade,
+      'address': address,
       'date': date,
     };
   }
 
-  factory Transcation.fromMap(
-    Map<String, dynamic> map,
-  ) {
-    return Transcation(
-      transcationId: map['transcationId'],
-      receiver_username: map['receiver_username'] ?? '',
+  factory Transaction.fromMap(Map<String, dynamic> map) {
+    return Transaction(
+      transactionId: map['transactionId'] ?? map['transactionId'] ?? '',
+      title: map['title'] ?? '',
       receiver_uid: map['receiver_uid'] ?? '',
-      receiver_pic: map['receiver_pic'] ?? '',
-      BTC: map['BTC'] ?? 0,
-      ETH: map['ETH'] ?? 0,
-      DOGE: map['DOGE'] ?? 0,
-      SOL: map['SOL'] ?? 0,
-      BNB: map['BNB'] ?? 0,
+      BTC: map['BTC']?.toDouble() ?? 0.0,
+      ETH: map['ETH']?.toDouble() ?? 0.0,
+      DOGE: map['DOGE']?.toDouble() ?? 0.0,
+      SOL: map['SOL']?.toDouble() ?? 0.0,
+      BNB: map['BNB']?.toDouble() ?? 0.0,
+      processing: map['processing'] ?? false,
       withdraw: map['withdraw'] ?? false,
-      date: map['date'].toDate(),
+      trade: map['trade'] ?? false,
+      address: map['address'] ?? '',
+      date: (map['date'] as Timestamp).toDate(),
     );
   }
 }

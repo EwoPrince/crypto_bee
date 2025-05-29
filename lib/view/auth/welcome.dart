@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 // ignore: camel_case_types
 class Welcome extends StatefulWidget {
   const Welcome();
-  static const routeName = '/WelcomeTocryptobee';
+  static const routeName = '/WelcomeTocryptobeam';
 
   @override
   _WelcomeState createState() => _WelcomeState();
@@ -36,7 +36,6 @@ class _WelcomeState extends State<Welcome> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              
                 Padding(
                   padding: EdgeInsets.all(8.0),
                   child: Text(
@@ -47,54 +46,53 @@ class _WelcomeState extends State<Welcome> {
                     ),
                   ),
                 ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                textAlign: TextAlign.start,
-                'With Crypto Beam, you can:',
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    textAlign: TextAlign.start,
+                    'With Crypto Beam, you can:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                textAlign: TextAlign.start,
-                '🔐 Securely manage your wallet (non-custodial – only you control your keys)',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    textAlign: TextAlign.start,
+                    '🔐 Securely manage your wallet (non-custodial – only you control your keys)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                textAlign: TextAlign.start,
-                '🔄 Instantly trade crypto with ease',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    textAlign: TextAlign.start,
+                    '🔄 Instantly trade crypto with ease',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                textAlign: TextAlign.start,
-                '📊 Track your portfolio and transactions in real time',
-                style: TextStyle(
-                  fontWeight: FontWeight.w500,
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    textAlign: TextAlign.start,
+                    '📊 Track your portfolio and transactions in real time',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ),
               ],
             ),
             SizedBox(height: 30),
-         CustomButton(
-                    color: Theme.of(context).primaryColor,
-                    name: 
-              'Done',
-             onTap: () {
+            CustomButton(
+              color: Theme.of(context).primaryColor,
+              name: 'Done',
+              onTap: () {
                 become(context, VerifiedState.routeName, null);
               },
             ),

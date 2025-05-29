@@ -24,7 +24,7 @@ class _PrivacyTipsState extends State<PrivacyTips> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                'Get tips on how to keep your account secured and what to share on cryptobee.',
+                'Get tips on how to keep your account secured and what to share on cryptobeam.',
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 5,
@@ -34,7 +34,7 @@ class _PrivacyTipsState extends State<PrivacyTips> {
                 height: 32,
               ),
               Text(
-                'Use data to make cryptobee work',
+                'Use data to make cryptobeam work',
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
                 softWrap: true,
@@ -46,7 +46,7 @@ class _PrivacyTipsState extends State<PrivacyTips> {
                 height: 12,
               ),
               Text(
-                'We need to store and process your data in other to provide you the basic cryptobee services, By using cryptobee, you allow us to provide this basic service. You can stop this by Deactivating or Deleting your account',
+                'We need to store and process your data in other to provide you the basic cryptobeam services, By using cryptobeam, you allow us to provide this basic service. You can stop this by Deactivating or Deleting your account',
                 textAlign: TextAlign.center,
                 softWrap: true,
               ),
@@ -54,7 +54,7 @@ class _PrivacyTipsState extends State<PrivacyTips> {
                 height: 32,
               ),
               Text(
-                'Use data to Customize and improve my cryptobee Experience',
+                'Use data to Customize and improve my cryptobeam Experience',
                 textAlign: TextAlign.center,
                 softWrap: true,
                 style: TextStyle(
@@ -65,7 +65,7 @@ class _PrivacyTipsState extends State<PrivacyTips> {
                 height: 12,
               ),
               Text(
-                'This allow us to use and process information about how you navigate and use cryptobee for analytical purpose, also allowing us to include you in new features and exprerimental test.',
+                'This allow us to use and process information about how you navigate and use cryptobeam for analytical purpose, also allowing us to include you in new features and exprerimental test.',
                 textAlign: TextAlign.center,
               ),
               Spacer(),
@@ -73,7 +73,7 @@ class _PrivacyTipsState extends State<PrivacyTips> {
                 context,
                 Icons.help_center_outlined,
                 'Help Center',
-                'A centralized hub for users to access information around process, products, and services concerning cryptobee.',
+                'A centralized hub for users to access information around process, products, and services concerning cryptobeam.',
               ).onTap(() {
                 goto(
                   context,

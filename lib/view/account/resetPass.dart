@@ -67,7 +67,7 @@ class _ResetPassState extends State<ResetPass> {
                   ? Loading()
                   : Consumer(builder: (context, ref, child) {
                       return CustomButton(
-                        color: Colors.white,
+                        color: Theme.of(context).primaryColor,
                         name: 
                         'Verify',
                       onTap:   () async {

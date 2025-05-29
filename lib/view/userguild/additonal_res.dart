@@ -38,7 +38,7 @@ class _AdditonalResState extends State<AdditonalRes> {
             context,
             Icons.menu_book_outlined,
             'Terms and Conditions',
-            'See the document governing the contractual relationship between cryptobee and its user.',
+            'See the document governing the contractual relationship between cryptobeam and its user.',
           ).onTap(() {
             goto(
               context,
@@ -50,7 +50,7 @@ class _AdditonalResState extends State<AdditonalRes> {
             context,
             Icons.help_center_outlined,
             'Help Center',
-            'A centralized hub for users to access information around process, products, and services concerning cryptobee.',
+            'A centralized hub for users to access information around process, products, and services concerning cryptobeam.',
           ).onTap(() {
             goto(
               context,
@@ -62,7 +62,7 @@ class _AdditonalResState extends State<AdditonalRes> {
             context,
             Icons.contact_support_outlined,
             'Get to us',
-            'Make Complaints and Enquiries about process, products, and services concerning cryptobee.',
+            'Make Complaints and Enquiries about process, products, and services concerning cryptobeam.',
           ).onTap(() {
             goto(
               context,

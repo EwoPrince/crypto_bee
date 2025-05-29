@@ -27,10 +27,10 @@
 
 //   Future<String> createReferLink(String referCode) async {
 //     final DynamicLinkParameters dynamicLinkParameters = DynamicLinkParameters(
-//       uriPrefix: 'https://ewoindustry.page.link/cryptobeeshare',
-//       link: Uri.parse('https://cryptobee.page.link/cryptobeeshare.refer?code=$referCode'),
+//       uriPrefix: 'https://ewoindustry.page.link/cryptobeamshare',
+//       link: Uri.parse('https://cryptobeam.page.link/cryptobeamshare.refer?code=$referCode'),
 //       androidParameters: AndroidParameters(
-//         packageName: 'com.ewoindustry.cryptobee',
+//         packageName: 'com.ewoindustry.cryptobeam',
 //       ),
 //       socialMetaTagParameters: SocialMetaTagParameters(
 //         title: 'REFER A FRIEND & EARN',

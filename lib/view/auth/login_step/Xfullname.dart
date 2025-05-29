@@ -38,7 +38,7 @@ class _FullNameState extends ConsumerState<XFullName> {
                 'Your Full Name would be used for accountabily reasons, so give us accurate details.',
                 textAlign: TextAlign.center,
               ),
-               CustomTextField(
+              CustomTextField(
                 labelText: "Full Name",
                 hintText: "Enter your full name",
                 controller: namecontroller,
@@ -55,7 +55,10 @@ class _FullNameState extends ConsumerState<XFullName> {
                   : SizedBox(
                       width: double.infinity,
                       child: CustomButton(
-                          name: 'Next', onTap: updateprofile, color: Theme.of(context).primaryColor),
+                        name: 'Next',
+                        onTap: updateprofile,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
             ],
           ),

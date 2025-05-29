@@ -1,4 +1,6 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/services/transfer_service.dart';
+import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/account/logout.dart';
 import 'package:crypto_beam/x.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +13,7 @@ void showWalletBottomSheet(BuildContext context, WidgetRef ref) {
     isScrollControlled: true,
     builder: (BuildContext context) {
       var user = ref.read(authProvider).user;
-      // final size = MediaQuery.of(context).size;
+      final prices = ref.watch(priceProvider);
 
       return Container(
         decoration: BoxDecoration(
@@ -27,7 +29,7 @@ void showWalletBottomSheet(BuildContext context, WidgetRef ref) {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  color: Theme.of(context).cardColor,
                 ),
                 // width: size.width - 13,
                 padding: EdgeInsets.all(10),
@@ -70,7 +72,10 @@ void showWalletBottomSheet(BuildContext context, WidgetRef ref) {
                       ],
                     ),
                     Text(
-                      numToCurrency(user.dollar, '2'),
+                      numToCurrency(
+                          TransferService.calculateUserDollarValue(
+                              user, prices),
+                          '2'),
                       overflow: TextOverflow.ellipsis,
                       softWrap: true,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -93,7 +98,7 @@ void showWalletBottomSheet(BuildContext context, WidgetRef ref) {
                 }),
               ],
             ),
-            SizedBox(height: 25),
+            SizedBox(height: 35),
           ],
         ),
       );

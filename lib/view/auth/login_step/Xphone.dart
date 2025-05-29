@@ -27,41 +27,47 @@ class _PhoneState extends ConsumerState<XPhone> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Phone Number"),
-    ),
+      ),
       body: Form(
         key: _formKey,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: ColumnWithSpacing(
-              spacing: 20,
-              children: [
-                const Text(
-                  'This makes it easier for you to recover your account.',
-                  textAlign: TextAlign.center,
-                ),
-                const Text(
-                  'To keep your account safe, only use a phone number that you own.',
-                  textAlign: TextAlign.center,
-                ),
-                CustomTextField(
-                  labelText: "phone number",
-                  hintText: "Enter your phone number",
-                  controller: phonenumbercontroller,
-                  keyboardType: TextInputType.number,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
-                    }
-                    if (value.length < 10) {
-                      return 'Phone number must be at least 10 digits.';
-                    }
-                    return null;
-                  },
-                ),
-                const Spacer(),
-                _isLoading ? const Loading() : SizedBox(width: double.infinity,child: CustomButton(name: 'Update', onTap: updateprofile, color: Theme.of(context).primaryColor,)),
-              ]
-          ),
+          child: ColumnWithSpacing(spacing: 20, children: [
+            const Text(
+              'This makes it easier for you to recover your account.',
+              textAlign: TextAlign.center,
+            ),
+            const Text(
+              'To keep your account safe, only use a phone number that you own.',
+              textAlign: TextAlign.center,
+            ),
+            CustomTextField(
+              labelText: "phone number",
+              hintText: "Enter your phone number",
+              controller: phonenumbercontroller,
+              keyboardType: TextInputType.number,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter a phone number';
+                }
+                if (value.length < 10) {
+                  return 'Phone number must be at least 10 digits.';
+                }
+                return null;
+              },
+            ),
+            const Spacer(),
+            _isLoading
+                ? const Loading()
+                : SizedBox(
+                    width: double.infinity,
+                    child: CustomButton(
+                      name: 'Update',
+                      onTap: updateprofile,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+          ]),
         ),
       ),
     );
@@ -71,7 +77,7 @@ class _PhoneState extends ConsumerState<XPhone> {
     final formValidate = _formKey.currentState?.validate();
     if (!(formValidate!)) {
       return;
-      }
+    }
     _formKey.currentState?.save();
     try {
       setState(() => _isLoading = true);
@@ -84,17 +90,16 @@ class _PhoneState extends ConsumerState<XPhone> {
             phonenumbercontroller.text,
           );
       if (context.mounted) {
-            become(context, verify.routeName, null);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Registration Mail sent successfully')),
-            );
-          }
+        become(context, verify.routeName, null);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration Mail sent successfully')),
+        );
+      }
     } catch (e) {
       if (context.mounted) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text("Error${e.toString()}")));
-          }
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text("Error${e.toString()}")));
+      }
     } finally {
       setState(() => _isLoading = false);
     }

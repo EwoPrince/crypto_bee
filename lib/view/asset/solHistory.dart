@@ -18,7 +18,7 @@ class _SOLHistoryState extends ConsumerState<SOLHistory> {
 
   Future<bool> fetchdata() async {
     final user = ref.read(authProvider).user;
-    await ref.read(transcationProvider).fetchTranscations(user!.uid);
+    await ref.read(transactionProvider).fetchTransactions(user!.uid);
     try {
       await Future.delayed(const Duration(milliseconds: 500));
       return true;
@@ -63,10 +63,10 @@ class _SOLHistoryState extends ConsumerState<SOLHistory> {
                 child: hes3(context),
               );
             }
-            final data = ref.watch(transcationProvider).transactions;
+            final data = ref.watch(transactionProvider).transactions;
             final newdata = data
                 .where((element) =>
-                    element.transcationId.isNotEmpty && element.SOL != 0)
+                    element.transactionId.isNotEmpty && element.SOL != 0)
                 .toList();
 
             return newdata.length == 0
@@ -84,7 +84,7 @@ class _SOLHistoryState extends ConsumerState<SOLHistory> {
                     itemCount: newdata.length,
                     itemBuilder: (context, i) {
                       var us = newdata[i];
-                      return TranscationTile(transcation: us);
+                      return TransactionTile(transaction: us);
                     },
                   );
           }),

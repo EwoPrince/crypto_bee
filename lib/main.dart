@@ -6,16 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-// const firebaseConfig = {
-  // apiKey: "AIzaSyBDFSPir71sTUPyU0_mjWZRPo2jIzzGgu4",
-  // authDomain: "swampthevotedamn.firebaseapp.com",
-  // databaseURL: "https://swampthevotedamn-default-rtdb.firebaseio.com",
-  // projectId: "swampthevotedamn",
-  // storageBucket: "swampthevotedamn.firebasestorage.app",
-  // messagingSenderId: "855278277443",
-  // appId: "1:855278277443:web:025d973757895b2b1855f6",
-  // measurementId: "G-ZPNR8X3H5Y"
-// };
 
 Future<void> main() async {
   await WidgetsFlutterBinding.ensureInitialized();

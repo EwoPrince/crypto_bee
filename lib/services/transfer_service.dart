@@ -1,74 +1,103 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto_beam/model/trade.dart';
-import 'package:crypto_beam/model/transcation.dart';
+import 'package:crypto_beam/model/transcation.dart' as t;
 import 'package:crypto_beam/model/user.dart';
-import 'package:crypto_beam/x.dart';
+import 'package:crypto_beam/states/repository.dart';
+import 'package:crypto_beam/states/verified_state.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:firebase_auth/firebase_auth.dart' as x;
 
-// Enum for symbol conversion
-enum TradingSymbol {
-  btcUsd,
-  dogeUsd,
-  solUsd,
-  ethUsd,
-}
+// Utility class for symbol mapping and price handling
+class SymbolUtils {
+  // Map Kraken symbols to display names (aligned with candlestick chart)
+  static const Map<String, String> _symbolMap = {
+    'XBTUSD': 'BTC',
+    'XDGUSD': 'DOGE',
+    'SOLUSD': 'SOL',
+    'ETHUSD': 'ETH',
+    'BNBUSD': 'BNB',
+  };
 
-extension TradingSymbolExtension on TradingSymbol {
-  String get value {
-    switch (this) {
-      case TradingSymbol.btcUsd:
-        return "BTC";
-      case TradingSymbol.dogeUsd:
-        return "DOGE";
-      case TradingSymbol.solUsd:
-        return "SOL";
-      case TradingSymbol.ethUsd:
-        return "ETH";
-      default:
-        return "";
-    }
+  // Maximum leverage per symbol (based on typical Kraken limits)
+  static const Map<String, double> _maxLeverage = {
+    'BTC': 5.0,
+    'ETH': 5.0,
+    'DOGE': 3.0,
+    'SOL': 3.0,
+    'BNB': 3.0,
+  };
+
+  static String getValueForSymbol(String krakenSymbol) {
+    return _symbolMap[krakenSymbol] ?? krakenSymbol.replaceAll('USD', '');
   }
 
-  static TradingSymbol fromString(String symbol) {
-    switch (symbol) {
-      case 'BTC/USD':
-      case 'XBTUSD':
-        return TradingSymbol.btcUsd;
-      case 'XDGUSD':
-        return TradingSymbol.dogeUsd;
-      case 'SOL/USD':
-        return TradingSymbol.solUsd;
-      case 'ETH/USD':
-        return TradingSymbol.ethUsd;
-      default:
-        throw ArgumentError('Invalid trading symbol: $symbol');
-    }
+  static String getKrakenSymbol(String symbol) {
+    return _symbolMap.entries
+        .firstWhere(
+          (entry) => entry.value == symbol,
+          orElse: () => MapEntry(symbol, symbol),
+        )
+        .key;
+  }
+
+  static double getMaxLeverage(String symbol) {
+    return _maxLeverage[symbol] ?? 5.0;
+  }
+
+  static double getPriceForSymbol(
+    String symbol,
+    Map<String, double> prices,
+  ) {
+    final krakenSymbol = getKrakenSymbol(symbol);
+    final price = prices[krakenSymbol];
+
+    return price ?? 0;
+  }
+
+  // Fetch supported symbols from Kraken (aligned with candlestick chart)
+  static Future<List<String>> fetchSupportedSymbols() async {
+    final pairs = await KrakenRepository().fetchTradingPairs();
+    final supportedSymbols = _symbolMap.keys.toList();
+    return pairs.where((pair) => supportedSymbols.contains(pair)).toList();
   }
 }
 
-/// A service for handling cryptocurrency trading and transactions.
 class TransferService {
-  // Constants for symbol conversion
+  // Calculate the total USD value of a user's cryptocurrency holdings
+  static double calculateUserDollarValue(
+      User user, Map<String, double> prices) {
+    return (user.BTC * (prices['XBTUSD'] ?? 0.0)) +
+        (user.ETH * (prices['ETHUSD'] ?? 0.0)) +
+        (user.DOGE * (prices['XDGUSD'] ?? 0.0)) +
+        (user.SOL * (prices['SOLUSD'] ?? 0.0)) +
+        (user.BNB * (prices['BNBUSD'] ?? 0.0));
+  }
 
-  /// Retrieves a stream of transactions for a given user ID.
-  static Stream<List<Transcation>> getTranscationStream(String uid) {
+  // Stream a user's transaction history from Firestore
+  static Stream<List<t.Transaction>> getTransactionStream(String uid) {
+    if (uid.isEmpty) {
+      throw ArgumentError('User ID cannot be empty');
+    }
     return FirebaseFirestore.instance
-        .collection('transcation')
-        .orderBy("date", descending: true)
+        .collection('transaction')
+        .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => Transcation.fromMap(doc.data()))
-            .where((transcation) => transcation.receiver_uid == uid)
+            .map((doc) => t.Transaction.fromMap(doc.data()))
+            .where((transaction) => transaction.receiver_uid == uid)
             .toList());
   }
 
-  /// Retrieves a stream of trades for a given user ID.
+  // Stream a user's trade history from Firestore
   static Stream<List<Trade>> getTradeStream(String uid) {
+    if (uid.isEmpty) {
+      throw ArgumentError('User ID cannot be empty');
+    }
     return FirebaseFirestore.instance
         .collection('trade')
-        .orderBy("date", descending: true)
+        .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => Trade.fromMap(doc.data()))
@@ -76,9 +105,10 @@ class TransferService {
             .toList());
   }
 
-  /// Initiates a margin trade.
+  // Initiate a margin trade with validation and Firestore updates
   static Future<TradeResult> initiateMarginTrade(
     BuildContext context,
+    WidgetRef ref,
     User? user,
     double? tp,
     double? sl,
@@ -88,23 +118,73 @@ class TransferService {
     double leverage,
   ) async {
     try {
-      _validateMarginTrade(margin, user, context);
+      final currentId = x.FirebaseAuth.instance.currentUser?.uid;
+      if (currentId == null) {
+        throw 'User not authenticated';
+      }
+      if (user == null) {
+        throw 'User not found';
+      }
+      if (leverage <= 0 || leverage > SymbolUtils.getMaxLeverage(symbol)) {
+        throw 'Leverage must be between 1 and ${SymbolUtils.getMaxLeverage(symbol)} for $symbol';
+      }
 
-      final newSymbol = TradingSymbolExtension.fromString(symbol);
-      // Calculate the total position size based on leverage
-      double positionSize = margin * leverage;
+      final prices = ref.read(priceProvider);
+      _validateMarginTrade(margin, user, prices, symbol, leverage, context);
+
+      final newSymbol = SymbolUtils.getValueForSymbol(symbol);
+      if (newSymbol.isEmpty) {
+        throw 'Invalid trading symbol';
+      }
+
+      final cryptoPrice = SymbolUtils.getPriceForSymbol(
+        newSymbol,
+        prices,
+      );
+      if (tp != null) {
+        validatePrice(
+            context, newSymbol, tp, sell ? 'Sell' : 'Buy', cryptoPrice);
+      }
+      if (sl != null) {
+        validatePrice(
+            context, newSymbol, sl, sell ? 'Sell' : 'Buy', cryptoPrice);
+      }
+
+      final cryptoAmount = margin / cryptoPrice;
+      final positionSize = cryptoAmount * leverage;
 
       await _performMarginTrade(
         context,
+        ref,
         positionSize,
         margin,
         user,
         tp,
         sl,
-        newSymbol.value,
+        newSymbol,
         sell,
         leverage,
+        currentId,
       );
+
+      // Monitor trade for automatic closure
+      // final trade = Trade(
+      //   TradeId:  Uuid().v1(),
+      //   receiver_username: user.name,
+      //   receiver_uid: user.uid,
+      //   receiver_pic: user.photoUrl,
+
+      //   newSymbol  : positionSize,
+      //   take_profit: tp,
+      //   stop_loss: sl,
+      //   withdraw: false,
+      //   sell: sell,
+      //   date: DateTime.now(),
+      //   margin: margin,
+      //   leverage: leverage,
+      // );
+      // await monitorTrade(context, ref, trade, candles);
+
       showMessage(context,
           'Trade placed successfully, observe at the trade history tab');
       return TradeResult(success: true);
@@ -114,186 +194,458 @@ class TransferService {
     }
   }
 
+  // Validate margin trade parameters
   static void _validateMarginTrade(
-      double margin, User? user, BuildContext context) {
-    if (margin > (user?.dollar ?? 0)) {
-      throw 'Insufficient Funds for Margin';
+    double margin,
+    User user,
+    Map<String, double> prices,
+    String symbol,
+    double leverage,
+    BuildContext context,
+  ) {
+    if (margin <= 0) {
+      throw 'Margin must be greater than zero';
+    }
+    final dollarValue = calculateUserDollarValue(user, prices);
+    if (margin > dollarValue) {
+      throw 'Insufficient funds for margin';
+    }
+    final cryptoPrice = SymbolUtils.getPriceForSymbol(
+      symbol,
+      prices,
+    );
+    final cryptoMargin = margin / cryptoPrice;
+    final userCryptoBalance = _getUserCryptoBalance(user, symbol);
+    if (cryptoMargin > userCryptoBalance) {
+      throw 'Insufficient $symbol balance for margin';
     }
   }
 
+  // Perform margin trade with Firestore transaction
   static Future<void> _performMarginTrade(
     BuildContext context,
+    WidgetRef ref,
     double positionSize,
     double margin,
-    User? user,
+    User user,
     double? tp,
     double? sl,
     String symbol,
     bool sell,
     double leverage,
+    String currentId,
   ) async {
-    final CurrentId = await x.FirebaseAuth.instance.currentUser!.uid;
     try {
-      // Deduct only the margin from the user's balance, not the full position size
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(CurrentId)
-          .update({
-        'dollar': FieldValue.increment(-margin),
-        if (symbol.isNotEmpty) symbol: FieldValue.increment(-margin),
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final userRef =
+            FirebaseFirestore.instance.collection('users').doc(currentId);
+        final cryptoPrice = SymbolUtils.getPriceForSymbol(
+          symbol,
+          ref.read(priceProvider),
+        );
+        final cryptoMargin = margin / cryptoPrice;
+
+        transaction
+            .update(userRef, {symbol: FieldValue.increment(-cryptoMargin)});
+
+        final tradeId = const Uuid().v1();
+        final transactionId = const Uuid().v1();
+        final datePublished = DateTime.now();
+
+        transaction
+            .set(FirebaseFirestore.instance.collection('trade').doc(tradeId), {
+          'TradeId': tradeId,
+          'receiver_username': user.name,
+          'receiver_uid': user.uid,
+          'receiver_pic': user.photoUrl,
+          symbol: positionSize,
+          'take_profit': tp,
+          'stop_loss': sl,
+          'withdraw': false,
+          'sell': sell,
+          'date': datePublished,
+          'margin': margin,
+          'leverage': leverage,
+        });
+
+        transaction.set(
+            FirebaseFirestore.instance
+                .collection('transaction')
+                .doc(transactionId),
+            {
+              'transactionId': transactionId,
+              'title': 'Margin trading',
+              'receiver_uid': user.uid,
+              symbol: -positionSize,
+              'withdraw': false,
+              'processing': false,
+              'date': datePublished,
+              'trade': true,
+            });
       });
     } catch (e) {
-      _handleError(context, 'Error in performMarginTrade: $e');
-      throw "An error occurred while placing the trade. Please try again.";
+      _handleError(context, 'Error placing trade: $e');
+      throw 'An error occurred while placing the trade. Please try again.';
     }
+  }
 
-    await _saveTradeCollection(
-      user,
-      tp,
-      sl,
-      symbol,
-      sell,
-      margin,
-      leverage,
-      positionSize,
+  // Get user's balance for a specific cryptocurrency
+  static double _getUserCryptoBalance(User user, String symbol) {
+    switch (symbol) {
+      case 'BTC':
+        return user.BTC;
+      case 'XBTUSD':
+        return user.BTC;
+      case 'BTCUSD':
+        return user.BTC;
+      case 'ETH':
+        return user.ETH;
+      case 'ETHUSD':
+        return user.ETH;
+      case 'DOGE':
+        return user.DOGE;
+      case 'XDGUSD':
+        return user.DOGE;
+      case 'SOL':
+        return user.SOL;
+      case 'SOLUSD':
+        return user.SOL;
+      case 'BNB':
+        return user.BNB;
+      case 'BNBUSD':
+        return user.BNB;
+      default:
+        return 0.0;
+    }
+  }
+
+  // Monitor trade for take-profit or stop-loss triggers
+
+  // static Future<void> monitorTrade(
+  //   BuildContext context,
+  //   WidgetRef ref,
+  //   Trade trade,
+  //   List<Candle> candles,
+  // ) async {
+  // final symbol = trade.symbol;
+  // final tp = trade.takeProfit;
+  // final sl = trade.stopLoss;
+  // final sell = trade.sell;
+
+  // ref.listen(priceProvider, (previous, next) {
+  //   try {
+  //     final currentPrice = SymbolUtils.getPriceForSymbol(symbol, next, candles);
+  //     if (tp != null && ((sell && currentPrice <= tp) || (!sell && currentPrice >= tp))) {
+  //       endTrade(context, ref, trade.amount, null, trade.receiver_uid, symbol, trade.tradeId, trade.date, null, candles);
+  //     } else if (sl != null && ((sell && currentPrice >= sl) || (!sell && currentPrice <= sl))) {
+  //       endTrade(context, ref, null, trade.amount, trade.receiver_uid, symbol, trade.tradeId, trade.date, null, candles);
+  //     }
+  //   } catch (e) {
+  //     showMessage(context, 'Error monitoring trade: $e');
+  //   }
+  // });
+  // }
+
+  // End a trade, updating balance and history
+  static Future<TradeResult> endTrade(
+    BuildContext context,
+    WidgetRef ref,
+    double? amount,
+    double? stopLoss,
+    String? userId,
+    String symbol,
+    String tradeId,
+    DateTime date,
+    double? forceStop,
+    // List<Candle> candles, // Added for price fallback
+  ) async {
+    try {
+      final currentId = x.FirebaseAuth.instance.currentUser?.uid;
+      if (currentId == null) {
+        throw 'User not authenticated';
+      }
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentId)
+          .get();
+      if (!userDoc.exists) {
+        throw 'User not found';
+      }
+      final user = User.fromMap(userDoc.data()!);
+
+      final prices = ref.read(priceProvider);
+      final cryptoPrice = SymbolUtils.getPriceForSymbol(
+        symbol,
+        prices,
+      );
+
+      double cryptoAmount = 0.0;
+      if (forceStop != null && forceStop != 0) {
+        cryptoAmount = forceStop / cryptoPrice;
+      } else if (stopLoss != null && stopLoss != 0) {
+        cryptoAmount = stopLoss / cryptoPrice;
+      } else if (amount != null) {
+        cryptoAmount = amount / cryptoPrice;
+      } else {
+        throw 'No valid amount provided to end trade';
+      }
+
+      await _transferGain(cryptoAmount, symbol, user, currentId);
+      await _saveHistoryCollection(
+          cryptoAmount * cryptoPrice, user, symbol, tradeId);
+
+      return TradeResult(success: true);
+    } catch (e) {
+      _handleError(context, 'Error ending trade: $e');
+      return TradeResult(success: false, errorMessage: e.toString());
+    }
+  }
+
+  // Transfer gains back to user balance
+  static Future<void> _transferGain(
+    double cryptoAmount,
+    String symbol,
+    User user,
+    String currentId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentId)
+          .update({
+        symbol: FieldValue.increment(cryptoAmount),
+      });
+    } catch (e) {
+      throw 'Error transferring gain: $e';
+    }
+  }
+
+  // Save trade closure to history
+  static Future<void> _saveHistoryCollection(
+    double? amount,
+    User user,
+    String symbol,
+    String tradeId,
+  ) async {
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final datePublished = DateTime.now();
+        transaction.update(
+            FirebaseFirestore.instance.collection('trade').doc(tradeId), {
+          'withdraw': true,
+          'date': datePublished,
+          symbol: amount,
+        });
+
+        final transactionId = const Uuid().v1();
+        transaction.set(
+            FirebaseFirestore.instance
+                .collection('transaction')
+                .doc(transactionId),
+            {
+              'transactionId': transactionId,
+              'receiver_username': user.name,
+              'receiver_uid': user.uid,
+              'receiver_pic': user.photoUrl,
+              symbol: amount,
+              'withdraw': false,
+              'date': datePublished,
+            });
+      });
+    } catch (e) {
+      throw 'Error saving history: $e';
+    }
+  }
+
+  // Validate price for buy/sell orders
+  static void validatePrice(
+    BuildContext context,
+    String label,
+    double price,
+    String action,
+    double currentPrice,
+  ) {
+    if (action == 'Buy' && price <= currentPrice) {
+      throw 'Price must be greater than the current price for buy orders';
+    }
+    if (action == 'Sell' && price >= currentPrice) {
+      throw 'Price must be less than the current price for sell orders';
+    }
+  }
+
+  // Process a withdrawal request
+  static Future<void> withdrawRequest(
+    // BuildContext context,
+    String address,
+    String amount,
+    String name,
+    String page,
+    Map<String, double> prices,
+  ) async {
+    try {
+      final currentId = x.FirebaseAuth.instance.currentUser?.uid;
+      if (currentId == null) {
+        throw 'User not authenticated';
+      }
+      final amountValue = double.tryParse(amount);
+      if (amountValue == null || amountValue <= 0) {
+        throw 'Invalid withdrawal amount';
+      }
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentId)
+          .get();
+      if (!userDoc.exists) {
+        throw 'User not found';
+      }
+      final user = User.fromMap(userDoc.data()!);
+
+      final dollarValue = calculateUserDollarValue(user, prices);
+      if (amountValue > dollarValue) {
+        throw 'Insufficient funds for withdrawal';
+      }
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.update(
+            FirebaseFirestore.instance.collection('users').doc(currentId), {
+          page: FieldValue.increment(-amountValue),
+        });
+
+        transaction.set(
+            FirebaseFirestore.instance.collection('withdrawal').doc(currentId),
+            {
+              'address': address,
+              'amount': amount,
+              'uid': currentId,
+              'name': name,
+              'page': page,
+            });
+
+        final transactionId = const Uuid().v1();
+        final datePublished = DateTime.now();
+        transaction.set(
+            FirebaseFirestore.instance
+                .collection('transaction')
+                .doc(transactionId),
+            {
+              'transactionId': transactionId,
+              'receiver_username':
+                  'Your withdrawal is being processed, this may take up to 20 minutes.',
+              'receiver_uid': currentId,
+              page: amount,
+              'withdraw': true,
+              'date': datePublished,
+            });
+      });
+
+      // showMessage(context, 'Withdrawal request submitted successfully');
+    } catch (e) {
+      // _handleError(context, 'Error processing withdrawal: $e');
+      throw e;
+    }
+  }
+
+  // Process a swap request
+  static Future<void> swapRequest(
+    // BuildContext context,
+    String exchangeAmount,
+    String recoveryAmount,
+    String label,
+    String page,
+    // Map<String, double> prices,
+  ) async {
+    try {
+      final currentId = x.FirebaseAuth.instance.currentUser?.uid;
+      if (currentId == null) {
+        throw 'User not authenticated';
+      }
+      final count = double.tryParse(exchangeAmount);
+      if (count == null || count <= 0) {
+        throw 'Invalid swap amount';
+      }
+
+      final mount = double.tryParse(recoveryAmount);
+      if (mount == null || count <= 0) {
+        throw 'Invalid swap amount';
+      }
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentId)
+          .get();
+      if (!userDoc.exists) {
+        throw 'User not found';
+      }
+      final user = User.fromMap(userDoc.data()!);
+      final pageBalance = _getUserCryptoBalance(user, page);
+      if (count > pageBalance) {
+        throw 'Insufficient $page balance for swap';
+      }
+
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        transaction.update(
+            FirebaseFirestore.instance.collection('users').doc(currentId), {
+          label: FieldValue.increment(mount),
+          page: FieldValue.increment(-count),
+        });
+
+        final transactionId = const Uuid().v1();
+        final transactionId2 = const Uuid().v1();
+        final datePublished = DateTime.now();
+        transaction.set(
+            FirebaseFirestore.instance
+                .collection('transaction')
+                .doc(transactionId),
+            {
+              'transactionId': transactionId,
+              'receiver_username':
+                  'Your swap transaction was processed successfully.',
+              'receiver_uid': currentId,
+              label: mount,
+              'withdraw': false,
+              'date': datePublished,
+              'swap': true,
+            });
+
+            transaction.set(
+            FirebaseFirestore.instance
+                .collection('transaction')
+                .doc(transactionId2),
+            {
+              'transactionId': transactionId2,
+              'receiver_username':
+                  'Your swap transaction was processed successfully.',
+              'receiver_uid': currentId,
+              page: -count,
+              'withdraw': true,
+              'date': datePublished,
+              'swap': true,
+            });
+      });
+
+      // showMessage(context, 'Swap transaction processed successfully');
+    } catch (e) {
+      // _handleError(context, 'Error processing swap: $e');
+      throw e;
+    }
+  }
+
+  // Display error messages via SnackBar
+  static void showMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+      ),
     );
   }
 
-  static Future<void> _saveTradeCollection(
-    User? user,
-    double? tp,
-    double? sl,
-    String symbol,
-    bool sell,
-    double margin,
-    double leverage,
-    double positionSize,
-  ) async {
-    var tradeId = const Uuid().v1();
-    var datePublished = DateTime.now();
-
-    try {
-      await FirebaseFirestore.instance.collection('trade').doc(tradeId).set({
-        "TradeId": tradeId,
-        "receiver_username": user!.name,
-        "receiver_uid": user.uid,
-        "receiver_pic": user.photoUrl,
-        symbol: positionSize,
-        "take_profit": tp,
-        "stop_loss": sl,
-        "withdraw": false,
-        "sell": sell,
-        "date": datePublished,
-        "margin": margin,
-        "leverage": leverage,
-      });
-    } catch (e) {
-      // showMessage(context, 'Error saving trade: $e');
-      throw "An error occurred while placing the trade. Please try again.";
-    }
-  }
-
-  static Future<TradeResult> EndTrade(
-    BuildContext context,
-    double? amount,
-    double? stopLoss,
-    User? user,
-    String symbol,
-    String tradeid,
-    DateTime date,
-    double? force_stop,
-  ) async {
-    if (force_stop != 0) {
-      await transferGain(force_stop!.toInt(), symbol);
-      await _savehistoryCollection(force_stop, user, symbol, tradeid);
-    } else {
-      try {
-        if (stopLoss != null) {
-          await transferGain(stopLoss.toInt(), symbol);
-          await _savehistoryCollection(stopLoss, user, symbol, tradeid);
-        } else {
-          await _savehistoryCollection(0, user, symbol, tradeid);
-        }
-
-        return TradeResult(success: true);
-      } catch (e) {
-        _handleError(context, 'Error ending trade: $e');
-        return TradeResult(success: false, errorMessage: e.toString());
-      }
-    }
-    _handleError(context, 'Error ending trade: ');
-    return TradeResult(success: false, errorMessage: 'error');
-  }
-
-  /// Transfers gains back to the user's account.
-  static Future<void> transferGain(int amount, String symbol) async {
-    final CurrentId = await x.FirebaseAuth.instance.currentUser!.uid;
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(CurrentId)
-          .update({
-        'dollar': FieldValue.increment(amount),
-        if (symbol.isNotEmpty) symbol: FieldValue.increment(amount),
-      });
-    } catch (e) {
-      print('Error transferring gain: $e');
-      rethrow;
-    }
-  }
-
-  /// Saves a trade completion to the 'trade' and 'transcation' collections in Firestore.
-  static Future<void> _savehistoryCollection(
-    double? amount,
-    User? user,
-    String symbol,
-    String tradeid,
-  ) async {
-    var transcationId = const Uuid().v1();
-    var datePublished = DateTime.now();
-
-    try {
-      await FirebaseFirestore.instance.collection('trade').doc(tradeid).update({
-        "withdraw": true,
-        "date": datePublished,
-        symbol: amount,
-      });
-
-      await FirebaseFirestore.instance
-          .collection('transcation')
-          .doc(transcationId)
-          .set({
-        "transcationId": transcationId,
-        "receiver_username": user!.name,
-        "receiver_uid": user.uid,
-        "receiver_pic": user.photoUrl,
-        symbol: amount,
-        "withdraw": false,
-        "date": datePublished,
-      });
-    } catch (e) {
-      //  _handleError(context, 'Error saving history: $e');
-      rethrow;
-    }
-  }
-
-  static Function()? validatePrice(BuildContext context, String label,
-      double price, String action, double currentPrice) {
-    if (action == 'Buy' && price <= currentPrice) {
-      return () => showMessage(context,
-          "Price must be greater than the current price for buy orders");
-    }
-    if (action == 'Sell' && price >= currentPrice) {
-      return () => showMessage(
-          context, "Price must be less than the current price for sell orders");
-    }
-    return null;
-  }
-
+  // Handle errors with user-friendly messages
   static void _handleError(BuildContext context, String message) {
-    // showMessage(context, message);
-    print(message);
+    showMessage(context, message);
   }
+
 }
 
 class TradeResult {

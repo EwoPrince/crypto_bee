@@ -67,7 +67,7 @@ void showSendModalBottomSheet(BuildContext context) {
             onTap:  () {
                 goto(context, currency['route'], null);
               },
-              color: Theme.of(context).primaryColor,);
+              color: Theme.of(context).cardColor,);
             }),
             const SizedBox(height: 30),
           ],

@@ -1,4 +1,3 @@
-import 'package:crypto_beam/view/dashboard/drawer.dart';
 import 'package:crypto_beam/view/dashboard/explore.dart';
 import 'package:crypto_beam/view/dashboard/market.dart';
 import 'package:crypto_beam/view/dashboard/wallet.dart';
@@ -35,7 +34,6 @@ class _LandState extends ConsumerState<Land> with WidgetsBindingObserver {
     return PopScope(
       canPop: willpop,
       child: Scaffold(
-        drawer: NavDrawer(),
         body: pages[_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,

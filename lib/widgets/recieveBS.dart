@@ -21,48 +21,54 @@ void showRecieveModalBottomSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-
             BottomsheetTile(
-        image:       'assets/images/btc.png',
-          name:     'Recieve BTC',
-          description:     'Transfer Bitcoin from external wallet, or purchase with Debit card',
-         top:      true,
-         bottom:      false,
-           onTap: () {
-              goto(context, RecieveBTC.routeName, null);
-            },
-            color: Theme.of(context).primaryColor,),
+              image: 'assets/images/btc.png',
+              name: 'Recieve BTC',
+              description:
+                  'Transfer Bitcoin from external wallet, or purchase with Debit card',
+              top: true,
+              bottom: false,
+              onTap: () {
+                goto(context, RecieveBTC.routeName, null);
+              },
+              color: Theme.of(context).cardColor,
+            ),
             BottomsheetTile(
-           image:     'assets/images/eth.png',
-           name:    'Recieve ETH',
-             description:    'Transfer Ethereum from external wallet, or purchase with Debit card',
-             top:    false,
-            bottom:   false,
-         onTap: () {
-              goto(context, RecieveETH.routeName, null);
-            },
-            color: Theme.of(context).primaryColor,),
+              image: 'assets/images/eth.png',
+              name: 'Recieve ETH',
+              description:
+                  'Transfer Ethereum from external wallet, or purchase with Debit card',
+              top: false,
+              bottom: false,
+              onTap: () {
+                goto(context, RecieveETH.routeName, null);
+              },
+              color: Theme.of(context).cardColor,
+            ),
             BottomsheetTile(
-            image:   'assets/images/doge.png',
-            name:   'Recieve DOGE',
-            description:   'Transfer DOGE from external wallet, or purchase with Debit card',
-           top:    false,
-           bottom:    false,
-          onTap: () {
-              goto(context, RecieveDoge.routeName, null);
-            },
-            color: Theme.of(context).primaryColor,),
+              image: 'assets/images/doge.png',
+              name: 'Recieve DOGE',
+              description:
+                  'Transfer DOGE from external wallet, or purchase with Debit card',
+              top: false,
+              bottom: false,
+              onTap: () {
+                goto(context, RecieveDoge.routeName, null);
+              },
+              color: Theme.of(context).cardColor,
+            ),
             BottomsheetTile(
-           image: 
-              'assets/images/sol.png',
-           name:    'Recieve SOL',
-           description:    'Transfer Solana from external wallet, or purchase with Debit card',
-           top:    false,
-           bottom:    true,
-            onTap: () {
-              goto(context, RecieveSOl.routeName, null);
-            },
-            color: Theme.of(context).primaryColor,),
+              image: 'assets/images/sol.png',
+              name: 'Recieve SOL',
+              description:
+                  'Transfer Solana from external wallet, or purchase with Debit card',
+              top: false,
+              bottom: true,
+              onTap: () {
+                goto(context, RecieveSOl.routeName, null);
+              },
+              color: Theme.of(context).cardColor,
+            ),
             SizedBox(height: 30),
           ],
         ),

@@ -46,7 +46,8 @@ class BannerLook extends StatelessWidget {
           ),
           Padding(
             padding: padding,
-            child: Text(title, style: Theme.of(context).textTheme.headlineLarge),
+            child:
+                Text(title, style: Theme.of(context).textTheme.headlineLarge),
           ),
           Text(
             subtitle,
@@ -54,18 +55,20 @@ class BannerLook extends StatelessWidget {
           ),
           Padding(
             padding: padding,
-            child: Text(description, style: Theme.of(context).textTheme.bodyLarge),
+            child:
+                Text(description, style: Theme.of(context).textTheme.bodyLarge),
           ),
           SizedBox(
             width: double.infinity,
             child: CustomButton(
-                name: buttonText,
-                onTap: () {},
-                color: Theme.of(context).primaryColor),
+              name: buttonText,
+              onTap: () {},
+              color: Theme.of(context).primaryColor,
+            ),
           )
         ],
-        ),
-      );
+      ),
+    );
   }
 }
 
@@ -84,4 +87,3 @@ class BannerData {
     required this.buttonText,
   });
 }
-

@@ -41,15 +41,6 @@ class _StakeState extends ConsumerState<Stake> {
   final StreamController<dynamic> _streamController =
       StreamController.broadcast();
   StreamSubscription? _channelSubscription;
-  final List<Indicator> indicators = [
-    BollingerBandsIndicator(
-      length: 20,
-      stdDev: 2,
-      upperColor: const Color(0xFF2962FF),
-      basisColor: const Color(0xFFFF6D00),
-      lowerColor: const Color(0xFF2962FF),
-    ),
-  ];
 
   // State variables for Zooming & Panning
   double _scale = 1.0;
@@ -265,7 +256,7 @@ class _StakeState extends ConsumerState<Stake> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('cryptoBeam Stake'),
+        title: const Text('Crypto Beam Chart'),
       ),
       body: Center(
         child: _isSymbolsLoading
@@ -292,12 +283,9 @@ class _StakeState extends ConsumerState<Stake> {
                                 : Candlesticks(
                                     key: Key(
                                         '$currentSymbol${currentInterval.toString()}'),
-                                    indicators: indicators,
+                                    // indicators: indicators,
                                     candles: candles,
                                     onLoadMoreCandles: _loadMoreCandles,
-                                    onRemoveIndicator: (indicator) => setState(
-                                        () => indicators.removeWhere(
-                                            (i) => i.name == indicator)),
                                     scale: _scale,
                                     translateX: _translateX,
                                     actions: _buildToolbarActions(),
@@ -536,12 +524,14 @@ class _TickerHeader extends StatelessWidget {
   }
 
   Widget _buildPriceInfo() {
-    if (candles.isEmpty) {
+    if (candles.isEmpty || candles.first.close == null) {
       return const Text("0.00",
           style: TextStyle(fontSize: 15, color: Colors.grey));
     }
     final closePrice = candles.first.close;
-    final lastClosePrice = candles.length > 1 ? candles[1].close : closePrice;
+    final lastClosePrice = candles.length > 1 && candles[1].close != null
+        ? candles[1].close
+        : closePrice;
 
     print(closePrice);
 
@@ -563,7 +553,11 @@ class _TickerHeader extends StatelessWidget {
   }
 
   List<Widget> _buildTickerData() {
-    if (candles.isEmpty) {
+    if (candles.isEmpty ||
+        candles.first.open == null ||
+        candles.first.close == null ||
+        candles.first.high == null ||
+        candles.first.low == null) {
       return List.generate(5, (_) => _TickerData(title: "", value: "0.00"));
     }
     final candle = candles.first;

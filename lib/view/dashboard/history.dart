@@ -1,15 +1,15 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/provider/transcation_provider.dart';
+import 'package:crypto_beam/services/transfer_service.dart';
+import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/widgets/he3.dart';
+import 'package:crypto_beam/widgets/stakeBS.dart';
 import 'package:crypto_beam/widgets/trade_tile.dart';
 import 'package:crypto_beam/widgets/transcation_tile.dart';
-import 'package:crypto_beam/x.dart';
+import 'package:crypto_beam/x.dart' as x;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:async';
 
 class History extends ConsumerStatefulWidget {
   const History({super.key});
@@ -21,7 +21,6 @@ class History extends ConsumerStatefulWidget {
 class _HistoryState extends ConsumerState<History>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  Timer? _timer;
 
   @override
   void initState() {
@@ -30,35 +29,39 @@ class _HistoryState extends ConsumerState<History>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
     });
-    _startTimer();
   }
 
   Future<void> _loadData() async {
     final user = ref.read(authProvider).user;
+    if (user == null) {
+      x.showMessage(context, 'User not authenticated');
+      return;
+    }
     try {
-      await ref.read(transcationProvider).fetchTranscations(user!.uid);
-      await ref.read(transcationProvider).fetchTrades(user.uid);
-    } catch (e) {}
+      await ref.read(transactionProvider).fetchTransactions(user.uid);
+      await ref.read(transactionProvider).fetchTrades(user.uid);
+    } catch (e) {
+      x.showMessage(context, 'Error loading data: $e');
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    _timer?.cancel();
     super.dispose();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
-      setState(() {});
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
-    var pnl = ref.watch(transcationProvider).pnl;
-    var apnl = ref.watch(transcationProvider).apnl;
+    final prices = ref.watch(priceProvider);
+    final pnl = ref.watch(transactionProvider).pnl;
+    final apnl = ref.watch(transactionProvider).apnl;
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text('Please log in to view history')),
+      );
+    }
     return Scaffold(
       body: NestedScrollView(
           headerSliverBuilder: (context, outterBoxIsScrolled) {
@@ -84,7 +87,21 @@ class _HistoryState extends ConsumerState<History>
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           Text(
-                            user!.dollar.toStringAsFixed(2),
+                            '\$ ${x.numToCurrency(TransferService.calculateUserDollarValue(user, prices), '2')}',
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Equity',
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          Text(
+                            '\$ ${x.numToCurrency(TransferService.calculateUserDollarValue(user, prices) + pnl, '2')}',
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                         ],
@@ -99,7 +116,7 @@ class _HistoryState extends ConsumerState<History>
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             Text(
-                              pnl.toStringAsFixed(2),
+                              '\$ ${x.numToCurrency(pnl, '2')}',
                               style: Theme.of(context)
                                   .textTheme
                                   .labelLarge!
@@ -148,7 +165,7 @@ class _HistoryState extends ConsumerState<History>
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Center(child: Consumer(builder: (context, ref, child) {
-        final data = ref.watch(transcationProvider).transactions;
+        final data = ref.watch(transactionProvider).transactions;
         if (data.isEmpty) {
           return _buildEmptyState(context);
         }
@@ -157,7 +174,7 @@ class _HistoryState extends ConsumerState<History>
           itemCount: data.length,
           itemBuilder: (context, i) {
             var us = data[i];
-            return TranscationTile(transcation: us);
+            return TransactionTile(transaction: us);
           },
         );
       })),
@@ -168,7 +185,7 @@ class _HistoryState extends ConsumerState<History>
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Center(child: Consumer(builder: (context, ref, child) {
-        final data = ref.watch(transcationProvider).trade;
+        final data = ref.watch(transactionProvider).trade;
         if (data.isEmpty) {
           return _buildEmptyState(context);
         }
@@ -192,25 +209,24 @@ class _HistoryState extends ConsumerState<History>
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             hes3(context),
-            _buildBuyRecieveButton(context),
+            _buildBuyReceiveButton(
+                context), // Fixed typo: BuyRecieve -> BuyReceive
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBuyRecieveButton(BuildContext context) {
+  Widget _buildBuyReceiveButton(BuildContext context) {
+    final prices = ref.read(priceProvider);
     return TextButton(
-      onPressed: () async {
-        await Clipboard.setData(
-            ClipboardData(text: "bc1q24tj0ytwyl3lnjd6hyqlh6n34m94hx5nqumrqk"));
-        showMessage(context, 'Wallet Address copied successfully');
-        if (!await launchUrl(
-          url,
-          mode: LaunchMode.externalApplication,
-        )) {
-          throw Exception('Could not launch $url');
+      onPressed: () {
+        final btcPrice = prices['BTC'] ?? 0.0;
+        if (btcPrice == 0.0) {
+          x.showMessage(context, 'BTC price not available');
+          return;
         }
+        showStakeBottomSheet(context, 'BTC/USD', btcPrice, 0);
       },
       child: const Text('Start Trading'),
     );

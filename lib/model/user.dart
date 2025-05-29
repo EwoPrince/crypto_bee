@@ -10,7 +10,6 @@ class User {
     required this.DOGE,
     required this.SOL,
     required this.BNB,
-    required this.dollar,
   });
 
   final String name;
@@ -23,7 +22,6 @@ class User {
   final double DOGE;
   final double SOL;
   final double BNB;
-  final double dollar;
 
   Map<String, dynamic> toMap() {
     return {
@@ -36,7 +34,6 @@ class User {
       'DOGE': DOGE,
       'SOL': SOL,
       'BNB' : BNB,
-      'dollar': dollar,
       'uid': uid,
     };
   }
@@ -55,7 +52,6 @@ class User {
       DOGE: map['DOGE'] ?? 0,
       SOL: map['SOL'] ?? 0,
       BNB: map['BNB'] ?? 0,
-      dollar: map['dollar'] ?? 0,
     );
   }
 }

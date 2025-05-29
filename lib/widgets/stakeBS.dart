@@ -1,21 +1,40 @@
 import 'dart:async';
+import 'package:crypto_beam/model/user.dart';
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/services/transfer_service.dart';
+import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/widgets/button.dart';
-import 'package:crypto_beam/widgets/textField.dart';
+import 'package:crypto_beam/widgets/loading.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-/// Displays a modal bottom sheet for buying or selling a cryptocurrency.
+// Utility functions from Wallet and TradeTile
+String numToCrypto(double value) {
+  return value
+      .toStringAsFixed(6)
+      .replaceAll(RegExp(r'0+$'), '')
+      .replaceAll(RegExp(r'\.$'), '');
+}
+
+String numToCurrency(double value, String decimals) {
+  return '\$${value.toStringAsFixed(int.parse(decimals))}';
+}
+
+void showMessage(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
+
 void showStakeBottomSheet(
-    BuildContext context, String symbol, double currentPrice, int index) {
+    BuildContext context, String krakenPair, double currentPrice, int index) {
   showModalBottomSheet(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
     builder: (BuildContext context) => BuySell(
-      currentSymbol: symbol,
+      krakenPair: krakenPair,
       index: index,
       currentPrice: currentPrice,
     ),
@@ -23,12 +42,12 @@ void showStakeBottomSheet(
 }
 
 class BuySell extends ConsumerStatefulWidget {
-  final String currentSymbol;
+  final String krakenPair;
   final int index;
   final double currentPrice;
 
   const BuySell({
-    required this.currentSymbol,
+    required this.krakenPair,
     required this.index,
     required this.currentPrice,
     super.key,
@@ -48,6 +67,8 @@ class _BuySellState extends ConsumerState<BuySell>
   final _amountController = TextEditingController();
   final _tpController = TextEditingController();
   final _slController = TextEditingController();
+  final _leverageController = TextEditingController(text: '1.0');
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -62,22 +83,51 @@ class _BuySellState extends ConsumerState<BuySell>
     _amountController.dispose();
     _tpController.dispose();
     _slController.dispose();
+    _leverageController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  String _formatSymbol() {
+    switch (widget.krakenPair) {
+      case 'XBTUSD':
+        return 'BTC/USD';
+      case 'ETHUSD':
+        return 'ETH/USD';
+      case 'XDGUSD':
+        return 'DOGE/USD';
+      case 'SOLUSD':
+        return 'SOL/USD';
+      case 'BNBUSD':
+        return 'BNB/USD';
+      default:
+        return widget.krakenPair;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _buildModalContent();
-  }
+    if (widget.currentPrice <= 0) {
+      return const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Text(
+          'Invalid price data',
+          style: TextStyle(fontSize: 18, color: Colors.red),
+          semanticsLabel: 'Invalid price data',
+        ),
+      );
+    }
 
-  Widget _buildModalContent() {
-    return Column(
-      children: [
-        _buildSymbolDisplay(),
-        const SizedBox(height: 8),
-        _buildTabBar(),
-        Expanded(child: _buildTabContent()),
-      ],
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.9,
+      child: Column(
+        children: [
+          _buildSymbolDisplay(),
+          const SizedBox(height: 8),
+          _buildTabBar(),
+          Expanded(child: _buildTabContent()),
+        ],
+      ),
     );
   }
 
@@ -85,41 +135,40 @@ class _BuySellState extends ConsumerState<BuySell>
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
-        _formatSymbol(widget.currentSymbol),
-        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        _formatSymbol(),
+        style: Theme.of(context)
+            .textTheme
+            .titleLarge!
+            .copyWith(fontWeight: FontWeight.bold),
+        semanticsLabel: 'Trading pair ${_formatSymbol()}',
       ),
     );
-  }
-
-  String _formatSymbol(String symbol) {
-    switch (symbol) {
-      case 'XBTUSD':
-        return "BTCUSD";
-      case 'XDGUSD':
-        return "DOGEUSD";
-      default:
-        return symbol;
-    }
   }
 
   Widget _buildTabBar() {
     return Container(
       height: 55,
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       child: TabBar(
         controller: _tabController,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey,
+        labelColor: 
+        Theme.of(context).colorScheme.onPrimary,
+        unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
         indicator: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: Theme.of(context).primaryColor,
+          color: _tabController.index == 0 ? Colors.green : Colors.red,
+          // Theme.of(context).colorScheme.primary,
         ),
-        labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        labelStyle: Theme.of(context)
+            .textTheme
+            .labelLarge!
+            .copyWith(fontWeight: FontWeight.bold),
         tabs: const [
           Tab(text: 'Buy'),
           Tab(text: 'Sell'),
         ],
         indicatorSize: TabBarIndicatorSize.tab,
-        indicatorPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+        // semanticsLabel: 'Buy or Sell tabs',
       ),
     );
   }
@@ -128,7 +177,7 @@ class _BuySellState extends ConsumerState<BuySell>
     return TabBarView(
       controller: _tabController,
       dragStartBehavior: DragStartBehavior.down,
-      physics: const BouncingScrollPhysics(),
+      physics: BouncingScrollPhysics(),
       children: ['Buy', 'Sell'].map(_buildSingleTabContent).toList(),
     );
   }
@@ -136,14 +185,14 @@ class _BuySellState extends ConsumerState<BuySell>
   Widget _buildSingleTabContent(String action) {
     final user = ref.watch(authProvider).user;
     return ListView(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
       children: [
         _buildOrderInfo('Open Limit Order'),
         _buildOrderInfo(
-            'Current Price: \$ ${widget.currentPrice.toStringAsFixed(2)}'),
-        const Divider(color: Colors.grey),
+            'Current Price: ${numToCurrency(widget.currentPrice, '2')}'),
+        const Divider(),
         _buildForm(action),
-        _buildAvailableBalance(user?.dollar),
+        _buildAvailableBalance(user),
         _buildSubmitButton(action),
       ],
     );
@@ -151,121 +200,121 @@ class _BuySellState extends ConsumerState<BuySell>
 
   Widget _buildOrderInfo(String title) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        color: Theme.of(context).primaryColor,
+        color: Theme.of(context).colorScheme.primaryContainer,
       ),
       child: Text(
         title,
-        style:
-            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+            ),
+        semanticsLabel: title,
       ),
     );
   }
 
   Widget _buildForm(String action) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _buildTextField('Margin', _amountController, action),
-            _buildCheckbox('Take Profit', _showTp,
-                (value) => setState(() => _showTp = value!)),
-            if (_showTp)
-              _buildTextField('Take Profit (USDT)', _tpController, action,
-                  isPrice: true),
-            _buildCheckbox('Stop Loss', _showSl,
-                (value) => setState(() => _showSl = value!)),
-            if (_showSl)
-              _buildTextField('Stop Loss (USDT)', _slController, action,
-                  isPrice: true),
-          ],
-        ),
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          _buildTextField('Margin', _amountController, action),
+          _buildTextField('Leverage', _leverageController, action,
+              isLeverage: true),
+          _buildCheckbox('Take Profit', _showTp,
+              (value) => setState(() => _showTp = value!)),
+          if (_showTp)
+            _buildTextField('Take Profit (USD)', _tpController, action,
+                isPrice: true),
+          _buildCheckbox('Stop Loss', _showSl,
+              (value) => setState(() => _showSl = value!)),
+          if (_showSl)
+            _buildTextField('Stop Loss (USD)', _slController, action,
+                isPrice: true),
+        ],
       ),
     );
   }
 
-  String _formatPrice(String symbol) {
-    var user = ref.read(authProvider).user;
-    if (symbol == 'XBTUSD') return '\$ ${user!.BTC}';
-    if (symbol == 'XDGUSD') return "\$ ${user!.DOGE}";
-    if (symbol == 'ETH/USD') return "\$ ${user!.ETH}";
-    if (symbol == 'SOL/USD') return "\$ ${user!.SOL}";
-    if (symbol == 'BNB/USD') return "\$ ${user!.BNB}";
-    return symbol;
-  }
-
   Widget _buildTextField(
       String label, TextEditingController controller, String action,
-      {bool isPrice = false}) {
-    return  SizedBox(
-          width: 300,
-          child: TextFormField(
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return "Amount in Dollars is Required";
-                }
-                return null;
-              },
-              controller: controller,
-              textInputAction: TextInputAction.done,
-              textAlign: TextAlign.justify,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-              decoration: InputDecoration(
-                prefix: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    ' \$ ',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                labelText: label,
-                hintText: _formatPrice(label),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              keyboardType: TextInputType.number),
-        );
-  }
-
-  Function()? _validateInput(
-      String label, String text, String action, bool isPrice) {
-    if (text.isEmpty) return () => showMessage(context, '$label is required');
-    final value = double.tryParse(text);
-    if (value == null) return () => showMessage(context, 'Invalid $label');
-    if (value == 0) return () => showMessage(context, "$label cannot be zero");
-    if (isPrice) {
-      return _validatePrice(label, value, action);
-    }
-    return null;
-  }
-
-  Function()? _validatePrice(String label, double price, String action) {
-    if (action == 'Buy' && price <= widget.currentPrice) {
-      return () => showMessage(context,
-          "Price must be greater than the current price for buy orders");
-    }
-    if (action == 'Sell' && price >= widget.currentPrice) {
-      return () => showMessage(
-          context, "Price must be less than the current price for sell orders");
-    }
-    return null;
+      {bool isPrice = false, bool isLeverage = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        controller: controller,
+        textInputAction: TextInputAction.done,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          prefixText: isLeverage ? null : '\$ ',
+          labelText: label,
+          hintText: isLeverage ? 'e.g., 1.0' : 'Enter amount in USD',
+          enabledBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Theme.of(context).colorScheme.outline),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide:
+                BorderSide(color: Theme.of(context).colorScheme.primary),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.error),
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return '$label is required';
+          }
+          final numValue = double.tryParse(value);
+          if (numValue == null || numValue <= 0) {
+            return '$label must be a positive number';
+          }
+          if (isLeverage && (numValue < 1 || numValue > 100)) {
+            return 'Leverage must be between 1 and 100';
+          }
+          if (isPrice) {
+            if (action == 'Buy' &&
+                label == 'Take Profit' &&
+                numValue <= widget.currentPrice) {
+              return 'Take Profit must be above current price';
+            }
+            if (action == 'Buy' &&
+                label == 'Stop Loss' &&
+                numValue >= widget.currentPrice) {
+              return 'Stop Loss must be below current price';
+            }
+            if (action == 'Sell' &&
+                label == 'Take Profit' &&
+                numValue >= widget.currentPrice) {
+              return 'Take Profit must be below current price';
+            }
+            if (action == 'Sell' &&
+                label == 'Stop Loss' &&
+                numValue <= widget.currentPrice) {
+              return 'Stop Loss must be above current price';
+            }
+          }
+          return null;
+        },
+        onChanged: (value) {
+          if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+          _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+            _formKey.currentState?.validate();
+          });
+        },
+      ),
+    );
   }
 
   Widget _buildCheckbox(
@@ -275,30 +324,45 @@ class _BuySellState extends ConsumerState<BuySell>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          TextButton(onPressed: () => onChanged(!value), child: Text(label)),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.bodyMedium,
+            semanticsLabel: label,
+          ),
           Checkbox(
             value: value,
-            onChanged: (newValue) {
-              if (newValue != null) {
-                setState(() => onChanged(newValue));
-              }
-            },
-            side: const BorderSide(width: 1),
+            onChanged: onChanged,
+            side: BorderSide(color: Theme.of(context).colorScheme.outline),
+            // semanticsLabel: 'Toggle $label',
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAvailableBalance(double? balance) {
+  Widget _buildAvailableBalance(User? user) {
+    final prices = ref.watch(priceProvider);
+    final balance = user != null
+        ? TransferService.calculateUserDollarValue(user, prices)
+        : 0.0;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text('Available USDT'),
-          Text('\$ ${balance?.toStringAsFixed(2) ?? '0.00'}',
-              style: Theme.of(context).textTheme.labelMedium),
+          Text(
+            'Available USD',
+            style: Theme.of(context).textTheme.bodyMedium,
+            semanticsLabel: 'Available USD',
+          ),
+          Text(
+            numToCurrency(balance, '2'),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium!
+                .copyWith(fontWeight: FontWeight.bold),
+            semanticsLabel: 'Available balance ${numToCurrency(balance, '2')}',
+          ),
         ],
       ),
     );
@@ -308,10 +372,14 @@ class _BuySellState extends ConsumerState<BuySell>
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Loading()
           : CustomButton(
-                        name:  action, onTap:  _onSubmit, 
-                        color: Colors.white,),
+              name: action,
+              onTap: _onSubmit,
+              color: _isLoading
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : Theme.of(context).colorScheme.primary,
+            ),
     );
   }
 
@@ -319,12 +387,14 @@ class _BuySellState extends ConsumerState<BuySell>
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       try {
-        await _placeOrder(action: _tabController.index == 0 ? 'Buy' : 'Sell');
-        if (context.mounted) Navigator.pop(context);
+        await _placeOrder();
+        if (context.mounted) {
+          showMessage(context, 'Trade placed successfully');
+          Navigator.pop(context);
+        }
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(e.toString())));
+          showMessage(context, 'Error placing trade: $e');
         }
       } finally {
         setState(() => _isLoading = false);
@@ -332,53 +402,41 @@ class _BuySellState extends ConsumerState<BuySell>
     }
   }
 
-  Future<void> _placeOrder({required String action}) async {
-    final margin = double.parse(_amountController.text);
+  Future<void> _placeOrder() async {
+    final user = ref.read(authProvider).user;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    final margin = double.tryParse(_amountController.text);
     final tp =
         _tpController.text.isNotEmpty ? double.parse(_tpController.text) : null;
     final sl =
         _slController.text.isNotEmpty ? double.parse(_slController.text) : null;
-    final user = ref.read(authProvider).user;
-    final bool isSell = action == 'Sell';
+    final leverage = double.tryParse(_leverageController.text) ?? 1.0;
+    final isSell = _tabController.index == 1;
 
-    // User's available balance
-    final double? userBalance = user?.dollar;
-
-    // Calculate leverage based on margin and current price of the asset
-    final double leverage =
-        widget.currentPrice > 0 ? (margin / widget.currentPrice) : 1.0;
-
-    // Check if the user has enough balance for the margin
-    if (userBalance == null || userBalance < margin) {
-      showMessage(context, 'Insufficient Funds for Margin');
-      return;
+    if (margin == null) {
+      throw Exception('Invalid margin amount');
     }
 
-    // The actual amount traded will be calculated in TransferService based on leverage
+    final balance =
+        TransferService.calculateUserDollarValue(user, ref.read(priceProvider));
+    if (balance < margin) {
+      throw Exception('Insufficient funds for margin');
+    }
+
     await TransferService.initiateMarginTrade(
       context,
+      ref,
       user,
       tp,
       sl,
       margin,
-      widget.currentSymbol,
+      widget.krakenPair,
       isSell,
+      
       leverage,
-    );
-  }
-
-  void showMessage(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Validation Error"),
-        content: Text(message),
-        actions: [
-          TextButton(
-              child: const Text('Ok'),
-              onPressed: () => Navigator.of(context).pop()),
-        ],
-      ),
     );
   }
 }

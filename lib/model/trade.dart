@@ -8,6 +8,7 @@ class Trade {
     this.ETH,
     this.DOGE,
     this.SOL,
+    this.BNB, // BNB is already included
     this.take_profit,
     this.stop_loss,
     this.withdraw,
@@ -26,6 +27,7 @@ class Trade {
   double? ETH;
   double? DOGE;
   double? SOL;
+  double? BNB; // BNB field is present
   double? take_profit;
   double? stop_loss;
   bool? withdraw;
@@ -45,6 +47,7 @@ class Trade {
       'ETH': ETH,
       'DOGE': DOGE,
       'SOL': SOL,
+      'BNB': BNB, // BNB in toMap
       'take_profit': take_profit,
       'stop_loss': stop_loss,
       'withdraw': withdraw,
@@ -56,9 +59,7 @@ class Trade {
     };
   }
 
-  factory Trade.fromMap(
-    Map<String, dynamic> map,
-  ) {
+  factory Trade.fromMap(Map<String, dynamic> map) {
     return Trade(
       TradeId: map['TradeId'],
       receiver_username: map['receiver_username'] ?? '',
@@ -68,6 +69,7 @@ class Trade {
       ETH: map['ETH'] ?? 0,
       DOGE: map['DOGE'] ?? 0,
       SOL: map['SOL'] ?? 0,
+      BNB: map['BNB'] ?? 0, // BNB in fromMap
       take_profit: map['take_profit'] ?? 0,
       stop_loss: map['stop_loss'] ?? 0,
       withdraw: map['withdraw'] ?? false,

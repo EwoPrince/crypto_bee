@@ -40,13 +40,20 @@ class _FullNameState extends ConsumerState<FullName> {
                 height: 20.0,
               ),
               CustomTextField(
-                  labelText: 'Full Name', hintText: '', controller: namecontroller,),
+                labelText: 'Full Name',
+                hintText: '',
+                controller: namecontroller,
+              ),
               Spacer(),
               _isLoading
                   ? Loading()
-                  : CustomButton(name:  'Update', onTap:  () {
-                      updateprofile();
-                    }, color: Colors.white,),
+                  : CustomButton(
+                      name: 'Update',
+                      onTap: () {
+                        updateprofile();
+                      },
+                      color: Theme.of(context).primaryColor,
+                    ),
               SizedBox(
                 height: 30,
               ),

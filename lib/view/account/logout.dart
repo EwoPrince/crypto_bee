@@ -20,7 +20,7 @@ class LogOut extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'Would you like to log out of your cryptobee account, you will be able to sign in when ever you insert your Email and password.',
+              'Would you like to log out of your cryptobeam account, you will be able to sign in when ever you insert your Email and password.',
               overflow: TextOverflow.ellipsis,
               maxLines: 5,
               softWrap: true,
@@ -31,10 +31,9 @@ class LogOut extends StatelessWidget {
             Spacer(),
             Consumer(builder: (context, ref, child) {
               return CustomButton(
-                color: Colors.white,
-               name:
-                'Log Out',
-              onTap:   () async {
+                color: Theme.of(context).primaryColor,
+                name: 'Log Out',
+                onTap: () async {
                   ref.read(authProvider).logoutUser();
                   become(context, Onboarding.routeName, null);
                 },

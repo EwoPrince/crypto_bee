@@ -3,6 +3,15 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+// Define price provider
+// final priceProvider = StateProvider<Map<String, double>>((ref) => {
+//       'BTC': 0.0,
+//       'ETH': 0.0,
+//       'DOGE': 0.0,
+//       'SOL': 0.0,
+//       'BNB': 0.0,
+//     });
+
 String numToCrypto(double number) {
   String pattern = '0.' + '0' * int.parse('4');
   NumberFormat format = NumberFormat(pattern);
@@ -40,16 +49,16 @@ String readTimestamp(DateTime timestamp) {
 
 Duration normalspeed = Duration(milliseconds: 700);
 
-double btcPrice = 101682.90;
-double bnbPrice = 611.80;
-double ethPrice = 3132.63;
-double solPrice = 234.59;
-double dogePrice = 0.33;
+// double btcPrice = 101682.90;
+// double bnbPrice = 611.80;
+// double ethPrice = 3132.63;
+// double solPrice = 234.59;
+// double dogePrice = 0.33;
 
-double btcPriceLP = 57648.53;
-double ethPriceLP = 2424.81;
-double solPriceLP = 157.74;
-double dogePriceLP = 0.30945;
+// double btcPriceLP = 57648.53;
+// double ethPriceLP = 2424.81;
+// double solPriceLP = 157.74;
+// double dogePriceLP = 0.30945;
 
 extension StringCasingExtension on String {
   String toCapitalized() =>
@@ -151,9 +160,3 @@ extension DoubleClick on Widget {
     );
   }
 }
-
-
-
-
-
-

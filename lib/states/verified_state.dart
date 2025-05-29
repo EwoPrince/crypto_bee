@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/view/dashboard/land.dart';
@@ -9,6 +10,22 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:crypto_beam/states/repository.dart';
 
+// Price provider for storing cryptocurrency prices
+final priceProvider = StateNotifierProvider<PriceNotifier, Map<String, double>>(
+    (ref) => PriceNotifier());
+
+class PriceNotifier extends StateNotifier<Map<String, double>> {
+  PriceNotifier() : super({});
+}
+
+final priceChangesProvider =
+    StateNotifierProvider<PriceChangesNotifier, Map<String, double>>(
+        (ref) => PriceChangesNotifier());
+
+class PriceChangesNotifier extends StateNotifier<Map<String, double>> {
+  PriceChangesNotifier() : super({});
+}
+
 class VerifiedState extends ConsumerStatefulWidget {
   const VerifiedState({Key? key}) : super(key: key);
   static const routeName = '/VerifyUser';
@@ -17,76 +34,165 @@ class VerifiedState extends ConsumerStatefulWidget {
   ConsumerState<VerifiedState> createState() => _VerifiedStateState();
 }
 
-class _VerifiedStateState extends ConsumerState<VerifiedState> {
+class _VerifiedStateState extends ConsumerState<VerifiedState>
+    with TickerProviderStateMixin {
   final KrakenRepository repository = KrakenRepository();
-  var uid = FirebaseAuth.instance.currentUser!.uid;
-  late Future futureHolder;
-  late String randomStart = '';
-  bool isEmailVerified = false;
+  late Future<bool> futureHolder;
+  late AnimationController _textAnimationController;
+  String randomStart = '';
+  String? errorMessage;
+  Timer? _textCycleTimer;
 
-  final startlist = [
-    "Getting the Cryto Engine ready",
+  final startList = [
+    "Getting CryptoBeam Ready",
+    "Fetching Market Data",
+    "Syncing User Profile",
+    "Preparing Charts",
   ];
 
-  Future<bool> start() async {
+  Future<bool> start({int retryCount = 0, int maxRetries = 3}) async {
+    if (retryCount >= maxRetries) {
+      setState(() {
+        errorMessage =
+            'Max retries reached. Please check your network and try again.';
+      });
+      return false;
+    }
     try {
-      ref.read(authProvider).getCurrentUser(uid);
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('No user logged in');
+      }
 
-      btcPrice = await repository.getCryptoPrice('bitcoin');
-      ethPrice = await repository.getCryptoPrice('ethereum');
-      solPrice = await repository.getCryptoPrice('solana');
-      dogePrice = await repository.getCryptoPrice('dogecoin');
-      dogePrice = await repository.getCryptoPrice('binancecoin');
+      await ref.read(authProvider).getCurrentUser(user.uid);
 
-      print('Bitcoin Price: $btcPrice');
-      print('Ethereum Price: $ethPrice');
-      print('Solana Price: $solPrice');
-      print('Dogecoin Price: $dogePrice');
+      final prices = await repository.getCryptoPrices([
+        'bitcoin',
+        'ethereum',
+        'solana',
+        'dogecoin',
+        'binancecoin',
+      ]);
 
-      // await ref.read(symbolsProvider).fetchSymbols();
-      ref.watch(authProvider).listenTocurrentUserNotifier(uid);
+      // Map CoinGecko coin IDs to Kraken-style pair names
+      final priceMap = {
+        'XBTUSD': prices['bitcoin'] ?? 0.0,
+        'ETHUSD': prices['ethereum'] ?? 0.0,
+        'SOLUSD': prices['solana'] ?? 0.0,
+        'XDGUSD': prices['dogecoin'] ?? 0.0,
+        'BNBUSD': prices['binancecoin'] ?? 0.0,
+      };
+      print('Prices: $priceMap');
+
+      final pricechanges = await repository.getCryptoPriceChanges([
+        'bitcoin',
+        'ethereum',
+        'solana',
+        'dogecoin',
+        'binancecoin',
+      ]);
+
+      final priceChangeMap = {
+        'XBTUSD': pricechanges['bitcoin'] ?? 0.0,
+        'ETHUSD': pricechanges['ethereum'] ?? 0.0,
+        'SOLUSD': pricechanges['solana'] ?? 0.0,
+        'XDGUSD': pricechanges['dogecoin'] ?? 0.0,
+        'BNBUSD': pricechanges['binancecoin'] ?? 0.0,
+      };
+      print('Prices: $priceChangeMap');
+
+      ref.read(priceProvider.notifier).state = priceMap;
+      ref.read(priceChangesProvider.notifier).state = priceChangeMap;
+
+      ref.read(authProvider).listenTocurrentUserNotifier(user.uid);
       return true;
-    } catch (e) {
+    } catch (e, st) {
+      setState(() {
+        errorMessage = e.toString().contains('Rate limit')
+            ? 'Rate limit exceeded. Retrying in 30 seconds...'
+            : e.toString().contains('ClientException')
+                ? 'Network error. Please check your internet connection.'
+                : 'Failed to initialize: $e';
+      });
+      if (e.toString().contains('Rate limit') ||
+          e.toString().contains('ClientException')) {
+        await Future.delayed(const Duration(seconds: 30));
+        return start(retryCount: retryCount + 1, maxRetries: maxRetries);
+      }
       return false;
     }
   }
 
-  randomText() {
-    Random random = Random();
-    int randomIndex = random.nextInt(startlist.length);
-    final randomItem = startlist[randomIndex];
+  void cycleText() {
+    final randomIndex = Random().nextInt(startList.length);
     setState(() {
-      randomStart = randomItem;
+      randomStart = startList[randomIndex];
     });
+    _textAnimationController.forward(from: 0);
   }
 
   @override
   void initState() {
-    randomText();
-    futureHolder = start();
     super.initState();
+    _textAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    cycleText();
+    _textCycleTimer =
+        Timer.periodic(const Duration(seconds: 3), (timer) => cycleText());
+    futureHolder = start();
+  }
+
+  @override
+  void dispose() {
+    _textAnimationController.dispose();
+    _textCycleTimer?.cancel();
+    repository.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<bool>(
       future: futureHolder,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             body: Center(
               child: Padding(
-                padding: EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Loading(),
-                    SizedBox(height: 100),
-                    Text(
-                      randomStart,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    )
+                    const Loading(),
+                    const SizedBox(height: 100),
+                    FadeTransition(
+                      opacity: _textAnimationController
+                          .drive(CurveTween(curve: Curves.easeInOut)),
+                      child: Text(
+                        randomStart,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    if (errorMessage != null) ...[
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        child: Text(
+                          errorMessage!,
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onErrorContainer,
+                                  ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -95,18 +201,35 @@ class _VerifiedStateState extends ConsumerState<VerifiedState> {
         }
 
         if (snapshot.data == true) {
-          return Land();
-        }
-        if (snapshot.data == false) {
-          return Networkiss();
+           become(context, Land.routeName, null);
+        return  Land();
         }
 
-        return Center(
-          child: Text(
-            'This Error is the first of it\'s kind.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 18,
+        if (snapshot.data == false) {
+          return const Networkiss();
+        }
+
+        return Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  errorMessage ?? 'An unexpected error occurred.',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      errorMessage = null;
+                      futureHolder = start();
+                    });
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
             ),
           ),
         );

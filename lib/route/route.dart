@@ -1,3 +1,4 @@
+import 'package:crypto_beam/view/Recieve/Deposit.dart';
 import 'package:crypto_beam/view/Recieve/RecieveBNB.dart';
 import 'package:crypto_beam/view/Recieve/RecieveBTC.dart';
 import 'package:crypto_beam/view/Recieve/RecieveDoge.dart';
@@ -12,6 +13,7 @@ import 'package:crypto_beam/view/auth/login_step/signin.dart';
 import 'package:crypto_beam/view/auth/login_step/signup.dart';
 import 'package:crypto_beam/view/auth/onboarding.dart';
 import 'package:crypto_beam/view/dashboard/market.dart';
+import 'package:crypto_beam/view/send/Transfer.dart';
 import 'package:crypto_beam/view/send/sendBNB.dart';
 import 'package:crypto_beam/view/send/sendBTC.dart';
 import 'package:crypto_beam/view/send/sendDOGE.dart';
@@ -345,6 +347,38 @@ final GoRouter router = GoRouter(
         return CustomTransitionPage(
           key: state.pageKey,
           child: SOLasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: Deposit.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: Deposit(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: Transfer.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: Transfer(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity:

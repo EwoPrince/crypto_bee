@@ -26,7 +26,10 @@ class ComingSoon extends StatelessWidget {
           children: [
             Spacer(),
             CustomButton(
-                        name:  'See you soon', onTap:  () {}, color: Colors.white,),
+              name: 'See you soon',
+              onTap: () {},
+              color: Theme.of(context).primaryColor,
+            ),
             SizedBox(
               height: 50,
             ),

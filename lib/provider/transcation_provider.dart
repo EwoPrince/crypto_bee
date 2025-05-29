@@ -1,30 +1,29 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:crypto_beam/model/trade.dart';
 import 'package:crypto_beam/model/transcation.dart';
 import 'package:crypto_beam/services/transfer_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final transcationProvider = ChangeNotifierProvider<TranscationProviders>(
-    (ref) => TranscationProviders());
+final transactionProvider = ChangeNotifierProvider<TransactionProviders>(
+    (ref) => TransactionProviders());
 
-class TranscationProviders extends ChangeNotifier {
-  List<Transcation> _transactions = [];
+class TransactionProviders extends ChangeNotifier {
+  List<Transaction> _transactions = [];
   List<Trade> _trade = [];
   double _pnl = 0;
   double _apnl = 0;
   Timer? _pnlTimer;
   final _random = Random();
-  StreamSubscription<List<Transcation>>? _transcationSubscription;
+  StreamSubscription<List<Transaction>>? _transactionSubscription;
   StreamSubscription<List<Trade>>? _tradeSubscription;
 
-  TranscationProviders() {
+  TransactionProviders() {
     _startPnlUpdates();
   }
 
-  List<Transcation> get transactions => _transactions;
+  List<Transaction> get transactions => _transactions;
   List<Trade> get trade => _trade;
 
   double get pnl => _pnl;
@@ -32,18 +31,18 @@ class TranscationProviders extends ChangeNotifier {
 
   @override
   void dispose() {
-    _transcationSubscription?.cancel();
+    _transactionSubscription?.cancel();
     _tradeSubscription?.cancel();
     _pnlTimer?.cancel();
     super.dispose();
   }
 
-  Future<void> fetchTranscations(String uid) async {
-    _transcationSubscription?.cancel();
+  Future<void> fetchTransactions(String uid) async {
+    _transactionSubscription?.cancel();
     try {
-      final Stream<List<Transcation>> dataStream =
-          TransferService.getTranscationStream(uid);
-      _transcationSubscription = dataStream.listen((data) {
+      final Stream<List<Transaction>> dataStream =
+          TransferService.getTransactionStream(uid);
+      _transactionSubscription = dataStream.listen((data) {
         _transactions = data;
         notifyListeners();
       }, onError: (e) {});
@@ -61,6 +60,9 @@ class TranscationProviders extends ChangeNotifier {
       }, onError: (e) {});
     } catch (e) {}
   }
+
+  
+
 
   void _startPnlUpdates() {
     _pnlTimer = Timer.periodic(const Duration(seconds: 3), (timer) {

@@ -1,5 +1,7 @@
 import 'package:crypto_beam/model/user.dart';
 import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/services/transfer_service.dart';
+import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/widgets/button.dart';
 import 'package:crypto_beam/widgets/loading.dart';
 import 'package:crypto_beam/widgets/textField.dart';
@@ -67,12 +69,12 @@ class _SendethState extends ConsumerState<Sendeth> {
   }
 
   Future<void> _processWithdrawal(User user, double amount) async {
-    var auth = ref.read(authProvider);
-    await auth.withdrawRequest(
+        await TransferService.withdrawRequest(
       _searchController.text,
       _amountController.text,
       user.name,
       'ETH',
+      ref.read(priceProvider),
     );
     showMessage(
       context,
@@ -109,14 +111,14 @@ class _SendethState extends ConsumerState<Sendeth> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
                   Text(
                     'Address or Domain Name',
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 18),
                   _buildSearchTextField(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   Text(
                     'Amount',
                     style: Theme.of(context).textTheme.bodyMedium,
@@ -131,14 +133,12 @@ class _SendethState extends ConsumerState<Sendeth> {
             const Spacer(),
             _isLoading
                 ? const Loading()
-                :  Padding(
+                : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: CustomButton(
-                        name: 
-                      'Verify',
-                     onTap:  _verify,
-                        color: Theme.of(context).primaryColor,
-                    
+                      name: 'Verify',
+                      onTap: _verify,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
             const SizedBox(height: 30),
@@ -150,56 +150,31 @@ class _SendethState extends ConsumerState<Sendeth> {
 
   Widget _buildSearchTextField() {
     return CustomTextField(
-                  labelText: 'Enter Wallet Address', 
-                  hintText: 'hold to paste address',
-                  controller: _searchController,
-                  );
-      }
-
-  Widget _buildAmountTextField() {
-    return SizedBox(
-          width: 300,
-          child: TextFormField(
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return "Amount in Dollars is Required";
-                }
-                return null;
-              },
-              controller: _amountController,
-              textInputAction: TextInputAction.done,
-              textAlign: TextAlign.justify,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-              decoration: InputDecoration(
-                prefix: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    ' \$ ',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                labelText: 'ETH amount',
-                hintText: '$ethPrice',
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Theme.of(context).primaryColor),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              keyboardType: TextInputType.number),
-        );
-    
+      labelText: 'Enter Wallet Address',
+      hintText: 'hold to paste address',
+      controller: _searchController,
+    );
   }
 
+  Widget _buildAmountTextField() {
+    final prices = ref.watch(priceProvider);
+    final ETHPrice = prices['ETHUSD'] ?? 0.0;
+    return CustomTextField(
+      labelText: 'ETH amount',
+      hintText: "$ETHPrice",
+      controller: _amountController,
+      keyboardType: TextInputType.number,
+      prefixIcon: const Icon(Icons.dialpad),
+      maxLines: 1,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Amount in Dollars is required';
+        }
+        return null;
+      },
+      // semanticsLabel: 'Receive amount in $currentLabel',
+    );
+  }
 
   Widget _buildPercentageButtons() {
     return Wrap(
@@ -215,19 +190,25 @@ class _SendethState extends ConsumerState<Sendeth> {
 
   Widget _buildPercentageButton(String label, double percentage) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(18.0),
       child: ElevatedButton(
         onPressed: () => _updateAmount(percentage),
         style: ElevatedButton.styleFrom(
           backgroundColor: Theme.of(context).primaryColor,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(18),
           ),
         ),
-        child: Text(
-          label,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+        child: SizedBox(
+          height: 80,
+          width: 120,
+          child: Center(
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );

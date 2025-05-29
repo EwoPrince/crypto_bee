@@ -3,7 +3,6 @@ import 'package:crypto_beam/model/user.dart';
 import 'package:firebase_auth/firebase_auth.dart' as x;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 
 final authProvider =
     ChangeNotifierProvider<AuthProviders>((ref) => AuthProviders());
@@ -80,81 +79,6 @@ class AuthProviders extends ChangeNotifier {
     listenTocurrentUserNotifier(CurrentId);
   }
 
-  Future withdrawRequest(
-      String address, String amount, String name, String page) async {
-    final CurrentId = await x.FirebaseAuth.instance.currentUser!.uid;
-    var transcationId = const Uuid().v1();
-    var datePublished = DateTime.now();
-    final mount = double.tryParse(amount);
-
-    await FirebaseFirestore.instance.collection("users").doc(CurrentId).update(
-      {
-        "dollar": FieldValue.increment(-mount!),
-        page: FieldValue.increment(-mount),
-      },
-    );
-
-    await FirebaseFirestore.instance
-        .collection("withdrawal")
-        .doc(CurrentId)
-        .set(
-      {
-        "address": address,
-        "amount": amount,
-        "uid": CurrentId,
-        "name": name,
-        "page": page,
-      },
-    );
-
-    await FirebaseFirestore.instance
-        .collection('transcation')
-        .doc(transcationId)
-        .set({
-      "transcationId": transcationId,
-      "receiver_username":
-          'Your transaction is being process, this may take up to 20 minutes.',
-      "receiver_uid": CurrentId,
-      "receiver_pic": user!.photoUrl,
-      page: amount,
-      "withdraw": true,
-      "date": datePublished,
-    });
-  }
-
-  Future swapRequest(
-    String exchange_amount,
-    String recovery_amount,
-    String label,
-    String page,
-  ) async {
-    final CurrentId = await x.FirebaseAuth.instance.currentUser!.uid;
-    var transcationId = const Uuid().v1();
-    var datePublished = DateTime.now();
-    final count = double.tryParse(exchange_amount);
-
-    await FirebaseFirestore.instance.collection("users").doc(CurrentId).update(
-      {
-        // "dollar": FieldValue.increment(-mount!),
-        label: FieldValue.increment(count!),
-        page: FieldValue.increment(-count),
-      },
-    );
-
-    await FirebaseFirestore.instance
-        .collection('transcation')
-        .doc(transcationId)
-        .set({
-      "transcationId": transcationId,
-      "receiver_username": 'Your swap transaction was processed successfully.',
-      "receiver_uid": CurrentId,
-      "receiver_pic": user!.photoUrl,
-      label: count,
-      "withdraw": false,
-      "date": datePublished,
-      "swap": true,
-    });
-  }
 
   Future loginUser(String email, String password) async {
     await x.FirebaseAuth.instance.signInWithEmailAndPassword(
