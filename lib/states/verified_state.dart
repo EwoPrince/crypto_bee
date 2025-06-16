@@ -198,10 +198,10 @@ class _VerifiedStateState extends ConsumerState<VerifiedState>
               ),
             ),
           );
-        }
+        } 
 
         if (snapshot.data == true) {
-           become(context, Land.routeName, null);
+          //  become(context, Land.routeName, null);
         return  Land();
         }
 

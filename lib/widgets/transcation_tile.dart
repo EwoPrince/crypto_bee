@@ -1,8 +1,25 @@
 import 'package:crypto_beam/model/transcation.dart';
 import 'package:crypto_beam/states/verified_state.dart';
-import 'package:crypto_beam/x.dart';
+import 'package:crypto_beam/x.dart' as x;
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+// Utility functions from Wallet
+String numToCrypto(double value) {
+  return value
+      .toStringAsFixed(6)
+      .replaceAll(RegExp(r'0+$'), '')
+      .replaceAll(RegExp(r'\.$'), '');
+}
+
+String numToCurrency(double value, String decimals) {
+  return '\$ ${value.toStringAsFixed(int.parse(decimals))}';
+}
+
+String readTimestamp(int timestamp) {
+  final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+}
 
 class TransactionTile extends ConsumerWidget {
   const TransactionTile({super.key, required this.transaction});
@@ -28,7 +45,7 @@ class TransactionTile extends ConsumerWidget {
         style: Theme.of(context).textTheme.titleMedium,
       ),
       subtitle: Text(
-        cryptoInfo['subtitle'] ?? 'No Value',
+        '${cryptoInfo['subtitle'] ?? 'No Value'} \n ${x.readTimestamp(transaction.date)}',
         style: Theme.of(context).textTheme.bodySmall,
       ),
       children: [
@@ -58,7 +75,7 @@ class TransactionTile extends ConsumerWidget {
                 _buildDetailRow(
                   context,
                   'Network',
-                  readTimestamp(transaction.date),
+                  cryptoInfo['network'] ?? '',
                 ),
                 if (transaction.withdraw ?? false) ...[
                   const SizedBox(height: 8),
@@ -84,7 +101,7 @@ class TransactionTile extends ConsumerWidget {
                 _buildDetailRow(
                   context,
                   'Network fee',
-                  '0.000000',
+                  '0.00000013',
                 ),
                 const SizedBox(height: 8),
                 _buildDetailRow(
@@ -95,8 +112,8 @@ class TransactionTile extends ConsumerWidget {
                 const SizedBox(height: 8),
                 _buildDetailRow(
                   context,
-                  'Date',
-                  readTimestamp(transaction.date),
+                  'Time',
+                  readTimestamp(transaction.date.millisecondsSinceEpoch),
                 ),
                 const SizedBox(height: 10),
               ],
@@ -114,8 +131,9 @@ class TransactionTile extends ConsumerWidget {
 
     if (transaction.BTC != null && transaction.BTC != 0) {
       final amount = transaction.BTC!;
-      final price = prices['BTC'] ?? 0.0;
+      final price = prices['XBTUSD'] ?? 0.0;
       return {
+        'network': 'Bitcoin',
         'asset': 'assets/images/btc.png',
         'title': isTrade
             ? 'BTC Spot Trading: ${numToCrypto(amount)}'
@@ -127,8 +145,9 @@ class TransactionTile extends ConsumerWidget {
       };
     } else if (transaction.ETH != null && transaction.ETH != 0) {
       final amount = transaction.ETH!;
-      final price = prices['ETH'] ?? 0.0;
+      final price = prices['ETHUSD'] ?? 0.0;
       return {
+        'network': 'Ethereum',
         'asset': 'assets/images/eth.png',
         'title': isTrade
             ? 'ETH Spot Trading: ${numToCrypto(amount)}'
@@ -140,8 +159,9 @@ class TransactionTile extends ConsumerWidget {
       };
     } else if (transaction.DOGE != null && transaction.DOGE != 0) {
       final amount = transaction.DOGE!;
-      final price = prices['DOGE'] ?? 0.0;
+      final price = prices['XDGUSD'] ?? 0.0;
       return {
+        'network': 'Doge',
         'asset': 'assets/images/doge.png',
         'title': isTrade
             ? 'DOGE Spot Trading: ${numToCrypto(amount)}'
@@ -153,8 +173,9 @@ class TransactionTile extends ConsumerWidget {
       };
     } else if (transaction.SOL != null && transaction.SOL != 0) {
       final amount = transaction.SOL!;
-      final price = prices['SOL'] ?? 0.0;
+      final price = prices['SOLUSD'] ?? 0.0;
       return {
+        'network': 'Solana',
         'asset': 'assets/images/sol.png',
         'title': isTrade
             ? 'SOL Spot Trading: ${numToCrypto(amount)}'
@@ -166,8 +187,9 @@ class TransactionTile extends ConsumerWidget {
       };
     } else if (transaction.BNB != null && transaction.BNB != 0) {
       final amount = transaction.BNB!;
-      final price = prices['BNB'] ?? 0.0;
+      final price = prices['BNBUSD'] ?? 0.0;
       return {
+        'network': 'Binance coin',
         'asset': 'assets/images/bnb.png',
         'title': isTrade
             ? 'BNB Spot Trading: ${numToCrypto(amount)}'
@@ -180,6 +202,7 @@ class TransactionTile extends ConsumerWidget {
     }
 
     return {
+      'network': '',
       'asset': null,
       'title': 'Unknown Transaction',
       'subtitle': 'No Value',

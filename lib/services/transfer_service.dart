@@ -22,10 +22,10 @@ class SymbolUtils {
 
   // Maximum leverage per symbol (based on typical Kraken limits)
   static const Map<String, double> _maxLeverage = {
-    'BTC': 5.0,
-    'ETH': 5.0,
-    'DOGE': 3.0,
-    'SOL': 3.0,
+    'BTC': 2.0,
+    'ETH': 3.0,
+    'DOGE': 6.0,
+    'SOL': 5.0,
     'BNB': 3.0,
   };
 
@@ -119,20 +119,21 @@ class TransferService {
   ) async {
     try {
       final currentId = x.FirebaseAuth.instance.currentUser?.uid;
+      final newSymbol = SymbolUtils.getValueForSymbol(symbol);
       if (currentId == null) {
         throw 'User not authenticated';
       }
       if (user == null) {
         throw 'User not found';
       }
-      if (leverage <= 0 || leverage > SymbolUtils.getMaxLeverage(symbol)) {
+      if (leverage <= 0.1 || leverage > SymbolUtils.getMaxLeverage(symbol)) {
         throw 'Leverage must be between 1 and ${SymbolUtils.getMaxLeverage(symbol)} for $symbol';
       }
 
       final prices = ref.read(priceProvider);
-      _validateMarginTrade(margin, user, prices, symbol, leverage, context);
 
-      final newSymbol = SymbolUtils.getValueForSymbol(symbol);
+      _validateMarginTrade(margin, user, prices, newSymbol, leverage, context);
+
       if (newSymbol.isEmpty) {
         throw 'Invalid trading symbol';
       }
@@ -143,11 +144,11 @@ class TransferService {
       );
       if (tp != null) {
         validatePrice(
-            context, newSymbol, tp, sell ? 'Sell' : 'Buy', cryptoPrice);
+            context, tp, sl ?? cryptoPrice-1, sell ? 'Sell' : 'Buy', cryptoPrice);
       }
       if (sl != null) {
         validatePrice(
-            context, newSymbol, sl, sell ? 'Sell' : 'Buy', cryptoPrice);
+            context, tp ?? cryptoPrice+1, sl, sell ? 'Sell' : 'Buy', cryptoPrice);
       }
 
       final cryptoAmount = margin / cryptoPrice;
@@ -206,10 +207,6 @@ class TransferService {
     if (margin <= 0) {
       throw 'Margin must be greater than zero';
     }
-    final dollarValue = calculateUserDollarValue(user, prices);
-    if (margin > dollarValue) {
-      throw 'Insufficient funds for margin';
-    }
     final cryptoPrice = SymbolUtils.getPriceForSymbol(
       symbol,
       prices,
@@ -217,7 +214,7 @@ class TransferService {
     final cryptoMargin = margin / cryptoPrice;
     final userCryptoBalance = _getUserCryptoBalance(user, symbol);
     if (cryptoMargin > userCryptoBalance) {
-      throw 'Insufficient $symbol balance for margin';
+      throw 'Insufficient $symbol balance $cryptoMargin against $userCryptoBalance for margin';
     }
   }
 
@@ -352,6 +349,7 @@ class TransferService {
     WidgetRef ref,
     double? amount,
     double? stopLoss,
+    double? leverage,
     String? userId,
     String symbol,
     String tradeId,
@@ -382,17 +380,19 @@ class TransferService {
       double cryptoAmount = 0.0;
       if (forceStop != null && forceStop != 0) {
         cryptoAmount = forceStop / cryptoPrice;
-      } else if (stopLoss != null && stopLoss != 0) {
+      } else if (stopLoss != null && stopLoss != 0 && stopLoss <= amount!) {
+
         cryptoAmount = stopLoss / cryptoPrice;
+
       } else if (amount != null) {
         cryptoAmount = amount / cryptoPrice;
       } else {
         throw 'No valid amount provided to end trade';
       }
 
-      await _transferGain(cryptoAmount, symbol, user, currentId);
+      await _transferGain((cryptoAmount * (leverage ?? 1)), symbol, user, currentId);
       await _saveHistoryCollection(
-          cryptoAmount * cryptoPrice, user, symbol, tradeId);
+          (cryptoAmount * (leverage ?? 1)), user, symbol, tradeId);
 
       return TradeResult(success: true);
     } catch (e) {
@@ -434,7 +434,7 @@ class TransferService {
             FirebaseFirestore.instance.collection('trade').doc(tradeId), {
           'withdraw': true,
           'date': datePublished,
-          symbol: amount,
+          // symbol: amount,
         });
 
         final transactionId = const Uuid().v1();
@@ -444,10 +444,13 @@ class TransferService {
                 .doc(transactionId),
             {
               'transactionId': transactionId,
-              'receiver_username': user.name,
+              'title': 'Trade reflect',
+              'address': 'Internal Trade Transcation',
               'receiver_uid': user.uid,
               'receiver_pic': user.photoUrl,
+              'processing': false,
               symbol: amount,
+              'trade': true,
               'withdraw': false,
               'date': datePublished,
             });
@@ -460,15 +463,15 @@ class TransferService {
   // Validate price for buy/sell orders
   static void validatePrice(
     BuildContext context,
-    String label,
-    double price,
+    double tp,
+    double sl,
     String action,
     double currentPrice,
   ) {
-    if (action == 'Buy' && price <= currentPrice) {
+    if (action == 'Buy' && tp <= sl) {
       throw 'Price must be greater than the current price for buy orders';
     }
-    if (action == 'Sell' && price >= currentPrice) {
+    if (action == 'Sell' && sl >= currentPrice) {
       throw 'Price must be less than the current price for sell orders';
     }
   }
@@ -516,7 +519,7 @@ class TransferService {
             FirebaseFirestore.instance.collection('withdrawal').doc(currentId),
             {
               'address': address,
-              'amount': amount,
+              'amount': double.tryParse(amount),
               'uid': currentId,
               'name': name,
               'page': page,
@@ -530,11 +533,14 @@ class TransferService {
                 .doc(transactionId),
             {
               'transactionId': transactionId,
-              'receiver_username':
+              'address': address,
+              'title':
                   'Your withdrawal is being processed, this may take up to 20 minutes.',
               'receiver_uid': currentId,
-              page: amount,
+              page: double.tryParse(amount),
+              'processing': true,
               'withdraw': true,
+              'trade': false,
               'date': datePublished,
             });
       });
@@ -593,35 +599,38 @@ class TransferService {
         final transactionId = const Uuid().v1();
         final transactionId2 = const Uuid().v1();
         final datePublished = DateTime.now();
+
+        
+        transaction.set(
+            FirebaseFirestore.instance
+                .collection('transaction')
+                .doc(transactionId2),
+            {
+              'transactionId': transactionId2,
+              'title': 'Your swap transcation was processed successfully.',
+              'receiver_uid': currentId,
+              page: -count,
+              'withdraw': true,
+              'processing': false,
+              'address': 'Interal Convert Transcation',
+              'date': datePublished,
+            });
+
         transaction.set(
             FirebaseFirestore.instance
                 .collection('transaction')
                 .doc(transactionId),
             {
               'transactionId': transactionId,
-              'receiver_username':
-                  'Your swap transaction was processed successfully.',
+              'title': 'Your swap transcation was processed successfully.',
               'receiver_uid': currentId,
               label: mount,
               'withdraw': false,
+              'processing': false,
+              'address': 'Interal Convert Transcation',
               'date': datePublished,
-              'swap': true,
             });
 
-            transaction.set(
-            FirebaseFirestore.instance
-                .collection('transaction')
-                .doc(transactionId2),
-            {
-              'transactionId': transactionId2,
-              'receiver_username':
-                  'Your swap transaction was processed successfully.',
-              'receiver_uid': currentId,
-              page: -count,
-              'withdraw': true,
-              'date': datePublished,
-              'swap': true,
-            });
       });
 
       // showMessage(context, 'Swap transaction processed successfully');
@@ -645,7 +654,6 @@ class TransferService {
   static void _handleError(BuildContext context, String message) {
     showMessage(context, message);
   }
-
 }
 
 class TradeResult {

@@ -12,7 +12,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 // Utility functions from Explore
 String numToCrypto(double value) {
   return value
-      .toStringAsFixed(6)
+      .toStringAsFixed(2)
       .replaceAll(RegExp(r'0+$'), '')
       .replaceAll(RegExp(r'\.$'), '');
 }

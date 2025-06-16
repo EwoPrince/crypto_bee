@@ -30,9 +30,13 @@ class BottomsheetTile extends StatelessWidget {
       borderRadius = const BorderRadius.only(
         topLeft: Radius.circular(30),
         topRight: Radius.circular(30),
+        bottomLeft: Radius.circular(30),
+        bottomRight: Radius.circular(30),
       );
     } else if (bottom) {
       borderRadius = const BorderRadius.only(
+        topLeft: Radius.circular(30),
+        topRight: Radius.circular(30),
         bottomLeft: Radius.circular(30),
         bottomRight: Radius.circular(30),
       );
@@ -48,7 +52,7 @@ class BottomsheetTile extends StatelessWidget {
         width: size.width,
         padding: const EdgeInsets.all(10),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Image.asset(
               image,

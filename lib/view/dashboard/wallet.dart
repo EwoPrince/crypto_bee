@@ -22,7 +22,7 @@ import 'package:url_launcher/url_launcher.dart';
 // Utility functions (unchanged)
 String numToCrypto(double value) {
   return value
-      .toStringAsFixed(6)
+      .toStringAsFixed(2)
       .replaceAll(RegExp(r'0+$'), '')
       .replaceAll(RegExp(r'\.$'), '');
 }
@@ -172,12 +172,13 @@ class _WalletState extends ConsumerState<Wallet>
                   ),
                 ],
               ),
-              SizedBox(width: 32),
+              SizedBox(height: 18),
               Text(
                 'Total Assets',
                 style: Theme.of(context).textTheme.titleLarge,
                 semanticsLabel: 'Total Assets',
               ),
+              SizedBox(height: 6),
               Row(
                 children: [
                   Text(
@@ -201,7 +202,7 @@ class _WalletState extends ConsumerState<Wallet>
                     ),
                 semanticsLabel: 'Total assets in BTC',
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 28),
               Container(
                 width: double.infinity,
                 height: 60,

@@ -76,7 +76,8 @@ class _HistoryState extends ConsumerState<History>
                   stretch: true,
                   snap: true,
                   automaticallyImplyLeading: false,
-                  title: Column(
+                  expandedHeight: apnl != 0 ? 160 : 120,
+                  flexibleSpace: Column(
                     children: [
                       const SizedBox(height: 10),
                       Row(
@@ -87,7 +88,7 @@ class _HistoryState extends ConsumerState<History>
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           Text(
-                            '\$ ${x.numToCurrency(TransferService.calculateUserDollarValue(user, prices), '2')}',
+                            '${x.numToCurrency(TransferService.calculateUserDollarValue(user, prices), '2')}',
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                         ],
@@ -97,16 +98,17 @@ class _HistoryState extends ConsumerState<History>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Equity',
+                            'Equity:',
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                           Text(
-                            '\$ ${x.numToCurrency(TransferService.calculateUserDollarValue(user, prices) + pnl, '2')}',
+                            '${x.numToCurrency(TransferService.calculateUserDollarValue(user, prices) + apnl, '2')}',
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      
+                      if (apnl != 0) SizedBox(height: 10),
                       if (apnl != 0)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -116,7 +118,7 @@ class _HistoryState extends ConsumerState<History>
                               style: Theme.of(context).textTheme.labelLarge,
                             ),
                             Text(
-                              '\$ ${x.numToCurrency(pnl, '2')}',
+                              '${x.numToCurrency(pnl , '2')}',
                               style: Theme.of(context)
                                   .textTheme
                                   .labelLarge!
@@ -221,12 +223,12 @@ class _HistoryState extends ConsumerState<History>
     final prices = ref.read(priceProvider);
     return TextButton(
       onPressed: () {
-        final btcPrice = prices['BTC'] ?? 0.0;
+        final btcPrice = prices['XBTUSD'] ?? 0.0;
         if (btcPrice == 0.0) {
           x.showMessage(context, 'BTC price not available');
           return;
         }
-        showStakeBottomSheet(context, 'BTC/USD', btcPrice, 0);
+        showStakeBottomSheet(context, 'XBTUSD', btcPrice, );
       },
       child: const Text('Start Trading'),
     );

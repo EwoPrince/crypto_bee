@@ -56,7 +56,7 @@ class CandleSticksStyle {
   }) {
     return CandleSticksStyle(
       borderColor: borderColor ?? const Color(0xFF848E9C),
-      background: background ?? const Color(0xFF191B20),
+      background: background ?? const Color.fromARGB(255, 0, 0, 0),
       primaryBull: primaryBull ?? const Color(0xFF26A69A),
       secondaryBull: secondaryBull ?? const Color(0xFF005940),
       primaryBear: primaryBear ?? const Color(0xFFEF5350),

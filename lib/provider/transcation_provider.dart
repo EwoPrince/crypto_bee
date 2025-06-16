@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart' as f;
 import 'package:crypto_beam/model/trade.dart';
 import 'package:crypto_beam/model/transcation.dart';
 import 'package:crypto_beam/services/transfer_service.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 final transactionProvider = ChangeNotifierProvider<TransactionProviders>(
@@ -42,10 +43,13 @@ class TransactionProviders extends ChangeNotifier {
     try {
       final Stream<List<Transaction>> dataStream =
           TransferService.getTransactionStream(uid);
-      _transactionSubscription = dataStream.listen((data) {
-        _transactions = data;
-        notifyListeners();
-      }, onError: (e) {});
+      _transactionSubscription = dataStream.listen(
+        (data) {
+          _transactions = data;
+          notifyListeners();
+        },
+        onError: (e) {},
+      );
     } catch (e) {}
   }
 
@@ -54,27 +58,45 @@ class TransactionProviders extends ChangeNotifier {
     try {
       final Stream<List<Trade>> dataStream =
           TransferService.getTradeStream(uid);
-      _tradeSubscription = dataStream.listen((data) {
-        _trade = data;
-        notifyListeners();
-      }, onError: (e) {});
+      _tradeSubscription = dataStream.listen(
+        (data) {
+          _trade = data;
+          notifyListeners();
+        },
+        onError: (e) {},
+      );
     } catch (e) {}
   }
 
-  
-
-
   void _startPnlUpdates() {
-    _pnlTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+    _pnlTimer = Timer.periodic(Duration(seconds: 3), (timer) {
       _updatePnl();
     });
   }
 
-  void _updatePnl() {
+  void _updatePnl() async {
     double change = (_random.nextDouble() - 0.5) * 10;
-    _apnl = _calculatePnl();
-    _pnl = max(_apnl + change, _apnl - change);
+    double calc = _calculatePnl();
+    double digits = await _getDigits();
+    _apnl = calc;
+    _pnl =  change + digits;
+    print(_pnl);
     notifyListeners();
+  }
+
+  Future<double> _getDigits() async {
+    double number = 0;
+    final userDoc = await f.FirebaseFirestore.instance
+        .collection('extras')
+        .doc('pnl')
+        .get();
+    if (userDoc.exists) {
+      Map<String, dynamic>? data = userDoc.data() as Map<String, dynamic>;
+      number = data['one'] ?? 0;
+      print(number.toString());
+    }
+    notifyListeners();
+    return number;
   }
 
   double _calculatePnl() {
@@ -86,8 +108,8 @@ class TransactionProviders extends ChangeNotifier {
           trade.BTC != null &&
           trade.ETH != null &&
           trade.DOGE != null) {
-        totalPnl +=
-            trade.BTC! + trade.ETH! + trade.SOL! + trade.DOGE! - trade.margin!;
+        totalPnl += trade.margin!;
+        print(totalPnl.toString());
       }
     }
     return totalPnl;

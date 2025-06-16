@@ -280,49 +280,51 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Form(
-              autovalidateMode: AutovalidateMode.always,
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // const SizedBox(height: 16),
-                  // Text(
-                  //   'Convert from',
-                  //   style: Theme.of(context).textTheme.bodyMedium,
-                  //   semanticsLabel: 'Source cryptocurrency',
-                  // ),
-                  const SizedBox(height: 8),
-                  _buildSearchTextField(),
-                  const SizedBox(height: 24),
-                  Text(
-                    'To',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    semanticsLabel: 'Target cryptocurrency',
-                  ),
-                  const SizedBox(height: 8),
-                  _buildSwapButtons(),
-                  const SizedBox(height: 8),
-                  _buildAmountTextField(),
-                ],
-              ),
-            ),
-            const Spacer(),
-            _isLoading
-                ? const Loading()
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: CustomButton(
-                      name: 'Verify',
-                      onTap: _verify,
-                      color: Theme.of(context).primaryColor,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Form(
+                autovalidateMode: AutovalidateMode.always,
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // const SizedBox(height: 16),
+                    // Text(
+                    //   'Convert from',
+                    //   style: Theme.of(context).textTheme.bodyMedium,
+                    //   semanticsLabel: 'Source cryptocurrency',
+                    // ),
+                    const SizedBox(height: 8),
+                    _buildSearchTextField(),
+                    const SizedBox(height: 24),
+                    Text(
+                      'To',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      semanticsLabel: 'Target cryptocurrency',
                     ),
-                  ),
-            const SizedBox(height: 30),
-          ],
+                    const SizedBox(height: 8),
+                    _buildSwapButtons(),
+                    const SizedBox(height: 8),
+                    _buildAmountTextField(),
+                  ],
+                ),
+              ),
+              SizedBox(height: 40),
+              _isLoading
+                  ? const Loading()
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: CustomButton(
+                        name: 'Verify',
+                        onTap: _verify,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -436,8 +438,8 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
           ),
         ),
         child: SizedBox(
-          height: 80,
-          width: 120,
+          height: 50,
+          width: 78,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,

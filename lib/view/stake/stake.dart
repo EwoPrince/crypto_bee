@@ -7,8 +7,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:crypto_beam/candlestick/candlesticks.dart';
 import 'package:crypto_beam/candlestick/models/candle.dart';
-import 'package:crypto_beam/candlestick/models/indicator.dart';
-import 'package:crypto_beam/candlestick/utils/indicators/bollinger_bands_indicator.dart';
 import 'package:crypto_beam/candlestick/widgets/toolbar_action.dart';
 import 'package:crypto_beam/states/repository.dart';
 
@@ -51,8 +49,10 @@ class _StakeState extends ConsumerState<Stake> {
   @override
   void dispose() {
     _channelSubscription?.cancel();
-    repository.closeConnection();
+    _channel?.sink.close();
     _streamController.close();
+    _streamController.stream.drain();
+    repository.closeConnection();
     super.dispose();
   }
 
@@ -94,6 +94,8 @@ class _StakeState extends ConsumerState<Stake> {
       _isCandlesLoading = true;
       _scale = 1.0;
       _translateX = 0.0;
+      _selectedCandle = null;
+      _showCandleDetails = false;
     });
   }
 
@@ -107,7 +109,10 @@ class _StakeState extends ConsumerState<Stake> {
         _isCandlesLoading = false;
       });
     } else {
-      _showErrorSnackBar('Error: No candle data received');
+      setState(() {
+        _isCandlesLoading = false;
+      });
+      _showErrorSnackBar('No candle data received');
     }
   }
 
@@ -116,7 +121,7 @@ class _StakeState extends ConsumerState<Stake> {
     setState(() {
       _isCandlesLoading = false;
     });
-    // _showErrorSnackBar("Error fetching candles: $e"); // Commented out to avoid spam
+    _showErrorSnackBar("Failed to load candles: $e");
   }
 
   Future<List<Candle>> _fetchCandles(String symbol, Interval interval) async {
@@ -124,19 +129,22 @@ class _StakeState extends ConsumerState<Stake> {
   }
 
   void _subscribeToTicker(String symbol) {
-    _channel = repository.establishConnection(symbol);
-    _channelSubscription = _channel?.stream.listen(
-      _handleWebSocketMessage,
-      onError: _handleWebSocketError,
-      onDone: _handleWebSocketDone,
-    );
+    try {
+      _channel = repository.establishConnection(symbol);
+      _channelSubscription = _channel?.stream.listen(
+        _handleWebSocketMessage,
+        onError: _handleWebSocketError,
+        onDone: _handleWebSocketDone,
+      );
+    } catch (e) {
+      _handleWebSocketError(e);
+    }
   }
 
   void _handleWebSocketMessage(dynamic message) {
     try {
       final decoded = jsonDecode(message);
       _streamController.add(decoded);
-      // Update the current price here if the message includes price data
       if (decoded is List && decoded.length > 1) {
         final tickerData = decoded[1] as Map<String, dynamic>;
         final price = _tryParseDouble(tickerData['c']?.toString());
@@ -148,22 +156,24 @@ class _StakeState extends ConsumerState<Stake> {
       }
     } catch (e) {
       debugPrint("Error decoding WebSocket message: $e");
-      _showErrorSnackBar("Error decoding websocket message: $e");
+      _showErrorSnackBar("Error decoding WebSocket message: $e");
     }
   }
 
   void _handleWebSocketError(Object error) {
-    _channel = null;
     debugPrint("WebSocket error: $error");
-    _showErrorSnackBar("Error from websocket: $error");
+    _channel = null;
+    _channelSubscription = null;
     setState(() {
       _isCandlesLoading = false;
     });
+    _showErrorSnackBar("WebSocket error: $error");
   }
 
   void _handleWebSocketDone() {
-    _channel = null;
     debugPrint("WebSocket connection closed.");
+    _channel = null;
+    _channelSubscription = null;
     setState(() {
       _isCandlesLoading = false;
     });
@@ -178,17 +188,20 @@ class _StakeState extends ConsumerState<Stake> {
 
   Future<void> _loadMoreCandles() async {
     try {
+      setState(() => _isCandlesLoading = true);
       final data = await repository.fetchCandles(
         productId: currentSymbol,
         interval: currentInterval,
       );
       setState(() {
-        if (candles.isNotEmpty) {
-          candles.removeLast(); // Avoid duplication
+        if (candles.isNotEmpty && data.isNotEmpty && candles.last.date == data.first.date) {
+          candles.removeLast();
         }
         candles.addAll(data);
+        _isCandlesLoading = false;
       });
     } catch (e) {
+      setState(() => _isCandlesLoading = false);
       _showErrorSnackBar("Error loading more candles: $e");
     }
   }
@@ -249,14 +262,16 @@ class _StakeState extends ConsumerState<Stake> {
   double? _tryParseDouble(String? value) =>
       value == null ? null : double.tryParse(value);
 
-  void _showErrorSnackBar(String message) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(message)));
+  void _showErrorSnackBar(String message) {} 
+  // ScaffoldMessenger.of(context)
+      // .showSnackBar(SnackBar(content: Text(message))
+      // );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crypto Beam Chart'),
+        title: const Text('Chart'),
       ),
       body: Center(
         child: _isSymbolsLoading
@@ -267,35 +282,45 @@ class _StakeState extends ConsumerState<Stake> {
                   updateCandlesFromSnapshot(snapshot);
                   return Column(
                     children: [
-                      _TickerHeader(
-                        currentSymbol: currentSymbol,
-                        candles: candles,
-                        onSymbolChange: () =>
-                            _showSymbolSelectionBottomSheet(context),
-                      ),
-                      const Divider(height: 1, color: Colors.grey),
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            _isCandlesLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator())
-                                : Candlesticks(
-                                    key: Key(
-                                        '$currentSymbol${currentInterval.toString()}'),
-                                    // indicators: indicators,
-                                    candles: candles,
-                                    onLoadMoreCandles: _loadMoreCandles,
-                                    scale: _scale,
-                                    translateX: _translateX,
-                                    actions: _buildToolbarActions(),
-                                  ),
-                            if (_showCandleDetails && _selectedCandle != null)
-                              _buildCandleDetailsView(
-                                  context, _selectedCandle!),
-                          ],
+                      if (_channel == null && !_isCandlesLoading && candles.isEmpty)
+                        Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text('Failed to connect to WebSocket'),
+                              ElevatedButton(
+                                onPressed: () => _subscribeToTicker(currentSymbol),
+                                child: const Text('Retry Connection'),
+                              ),
+                            ],
+                          ),
+                        )
+                      else if (candles.isEmpty && !_isCandlesLoading)
+                        const Center(child: Text('No data available'))
+                      else
+                        Expanded(
+                          child: Stack(
+                            children: [
+                              Candlesticks(
+                                key: Key('$currentSymbol${currentInterval.toString()}'),
+                                candles: candles,
+                                onLoadMoreCandles: _loadMoreCandles,
+                                scale: _scale,
+                                translateX: _translateX,
+                                onTapUp: _handleCandleTap,
+                                actions: _buildToolbarActions(),
+                              ),
+                              if (_showCandleDetails && _selectedCandle != null)
+                                _buildCandleDetailsView(context, _selectedCandle!),
+                              if (_isCandlesLoading)
+                                const Positioned(
+                                  bottom: 10,
+                                  right: 10,
+                                  child: Loading(),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
                     ],
                   );
                 },
@@ -307,7 +332,7 @@ class _StakeState extends ConsumerState<Stake> {
   void _handleCandleTap(TapUpDetails details) {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset localOffset = box.globalToLocal(details.globalPosition);
-    final candleWidth = 10.0 * _scale;
+    final candleWidth = (6.0 * _scale).clamp(2.0, 20.0); // Sync with Candlesticks
     final scrollStart = _translateX;
 
     for (int i = 0; i < candles.length; i++) {
@@ -326,28 +351,28 @@ class _StakeState extends ConsumerState<Stake> {
   List<ToolBarAction> _buildToolbarActions() {
     return [
       ToolBarAction(
-        width: 55,
-        onPressed: () => _showIntervalSelectionDialog(context),
-        child: FittedBox(child: Text(currentInterval.name)),
-      ),
-      ToolBarAction(
-        width: 100,
+        width: 120,
         onPressed: () => _showSymbolSelectionBottomSheet(context),
         child: Text(_formatSymbol(currentSymbol)),
       ),
+      // ToolBarAction(
+      //   width: 100,
+      //   onPressed: () => _showIntervalSelectionBottomSheet(context),
+      //   child: Text(currentInterval.toString().split('.').last),
+      // ),
       ToolBarAction(
-        width: 65,
-        color: Colors.green,
-        onPressed: () =>
-            showStakeBottomSheet(context, currentSymbol, _currentPrice ?? 0, 0),
-        child: const Text('Buy'),
-      ),
-      ToolBarAction(
-        width: 65,
+        width: 85,
         color: Colors.red,
         onPressed: () =>
-            showStakeBottomSheet(context, currentSymbol, _currentPrice ?? 0, 1),
+            showStakeBottomSheet(context, currentSymbol, _currentPrice ?? 0, ),
         child: const Text('Sell'),
+      ),
+      ToolBarAction(
+        width: 85,
+        color: Color(0xFF26A69A),
+        onPressed: () =>
+            showStakeBottomSheet(context, currentSymbol, _currentPrice ?? 0, ),
+        child: const Text('Buy'),
       ),
     ];
   }
@@ -356,41 +381,6 @@ class _StakeState extends ConsumerState<Stake> {
     if (symbol == 'XBTUSD') return "BTC/USD";
     if (symbol == 'XDGUSD') return "DOGE/USD";
     return symbol;
-  }
-
-  void _showIntervalSelectionDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Center(
-        child: Container(
-          width: 600,
-          color: Theme.of(context).badgeTheme.backgroundColor,
-          child: Wrap(
-            children:
-                intervals.map((e) => _buildIntervalButton(context, e)).toList(),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildIntervalButton(BuildContext context, Interval e) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: SizedBox(
-        width: 150,
-        height: 40,
-        child: RawMaterialButton(
-          elevation: 0,
-          fillColor: const Color(0xFF494537),
-          onPressed: () {
-            _fetchCandlesAndSubscribe(currentSymbol, e);
-            Navigator.of(context).pop();
-          },
-          child: Text(e.name, style: const TextStyle(color: Color(0xFFF0B90A))),
-        ),
-      ),
-    );
   }
 
   void _showSymbolSelectionBottomSheet(BuildContext context) {
@@ -405,9 +395,10 @@ class _StakeState extends ConsumerState<Stake> {
             height: MediaQuery.of(context).size.height * 0.75,
             color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
             child: ListView(
-                children: symbols
-                    .map((e) => _buildSymbolButton(context, e))
-                    .toList()),
+              children: symbols
+                  .map((e) => _buildSymbolButton(context, e))
+                  .toList(),
+            ),
           ),
         ),
       ),
@@ -427,12 +418,54 @@ class _StakeState extends ConsumerState<Stake> {
             _fetchCandlesAndSubscribe(e, currentInterval);
             Navigator.of(context).pop();
           },
-          child: Text(_formatSymbol(e),
-              style: const TextStyle(color: Color(0xFFF0B90A))),
+          child: Text(
+            _formatSymbol(e),
+            style: const TextStyle(color: Color(0xFFF0B90A)),
+          ),
         ),
       ),
     );
   }
+
+  // void _showIntervalSelectionBottomSheet(BuildContext context) {
+  //   showModalBottomSheet(
+  //     backgroundColor: Colors.transparent,
+  //     context: context,
+  //     builder: (context) => Center(
+  //       child: Material(
+  //         color: Colors.transparent,
+  //         child: Container(
+  //           width: 300,
+  //           height: MediaQuery.of(context).size.height * 0.75,
+  //           color: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+  //           child: ListView(
+  //             children: intervals
+  //                 .map((e) => Padding(
+  //                       padding: const EdgeInsets.all(8.0),
+  //                       child: SizedBox(
+  //                         width: 70,
+  //                         height: 40,
+  //                         child: RawMaterialButton(
+  //                           elevation: 0,
+  //                           fillColor: const Color(0xFF494537),
+  //                           onPressed: () {
+  //                             _fetchCandlesAndSubscribe(currentSymbol, e);
+  //                             Navigator.of(context).pop();
+  //                           },
+  //                           child: Text(
+  //                             e.toString().split('.').last,
+  //                             style: const TextStyle(color: Color(0xFFF0B90A)),
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ))
+  //                 .toList(),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildCandleDetailsView(BuildContext context, Candle candle) {
     return Positioned(
@@ -475,121 +508,6 @@ class _StakeState extends ConsumerState<Stake> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _TickerHeader extends StatelessWidget {
-  final String currentSymbol;
-  final List<Candle> candles;
-  final VoidCallback onSymbolChange;
-
-  const _TickerHeader({
-    Key? key,
-    required this.currentSymbol,
-    required this.candles,
-    required this.onSymbolChange,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 80,
-      width: double.maxFinite,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          InkWell(
-            onTap: onSymbolChange,
-            child: Text(
-              _formatSymbol(currentSymbol),
-              style: const TextStyle(fontSize: 20),
-            ),
-          ),
-          const SizedBox(width: 20),
-          _buildPriceInfo(),
-          const SizedBox(width: 10),
-          ..._buildTickerData(),
-        ],
-      ),
-    );
-  }
-
-  String _formatSymbol(String symbol) {
-    if (symbol == 'XBTUSD') return "BTCUSD";
-    if (symbol == 'XDGUSD') return "DOGEUSD";
-    return symbol;
-  }
-
-  Widget _buildPriceInfo() {
-    if (candles.isEmpty || candles.first.close == null) {
-      return const Text("0.00",
-          style: TextStyle(fontSize: 15, color: Colors.grey));
-    }
-    final closePrice = candles.first.close;
-    final lastClosePrice = candles.length > 1 && candles[1].close != null
-        ? candles[1].close
-        : closePrice;
-
-    print(closePrice);
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          closePrice.toStringAsFixed(2),
-          style: TextStyle(
-              fontSize: 15,
-              color: closePrice > lastClosePrice ? Colors.green : Colors.red),
-        ),
-        const SizedBox(height: 5),
-        Text("\$${closePrice.toStringAsFixed(2)}",
-            style: const TextStyle(fontSize: 12)),
-      ],
-    );
-  }
-
-  List<Widget> _buildTickerData() {
-    if (candles.isEmpty ||
-        candles.first.open == null ||
-        candles.first.close == null ||
-        candles.first.high == null ||
-        candles.first.low == null) {
-      return List.generate(5, (_) => _TickerData(title: "", value: "0.00"));
-    }
-    final candle = candles.first;
-    return [
-      _TickerData(title: "Open", value: candle.open.toStringAsFixed(2)),
-      _TickerData(title: "Close", value: candle.close.toStringAsFixed(2)),
-      _TickerData(title: "High", value: candle.high.toStringAsFixed(2)),
-      _TickerData(title: "Low", value: candle.low.toStringAsFixed(2)),
-      _TickerData(
-          title: "Change",
-          value: (candle.close - candle.open).toStringAsFixed(2)),
-    ];
-  }
-}
-
-class _TickerData extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const _TickerData({Key? key, required this.title, required this.value})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 12, color: Colors.grey)),
-        const SizedBox(height: 5),
-        Text(value),
-      ],
     );
   }
 }

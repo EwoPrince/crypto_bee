@@ -162,6 +162,13 @@ class _TradeTileState extends ConsumerState<TradeTile> {
           title: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (widget.trade.margin != null)
+                Text(
+                  'Margin Used: ${numToCurrency(widget.trade.margin!, '2')}',
+                  style: const TextStyle(fontSize: 14),
+                  semanticsLabel:
+                      'Margin Used ${numToCurrency(widget.trade.margin!, '2')}',
+                ),
               if (widget.trade.take_profit != null &&
                   widget.trade.take_profit != 0)
                 Text(
@@ -177,12 +184,11 @@ class _TradeTileState extends ConsumerState<TradeTile> {
                   semanticsLabel:
                       'Stop Loss at ${numToCurrency(widget.trade.stop_loss!, '2')}',
                 ),
-              if (widget.trade.margin != null)
                 Text(
-                  'Margin Used: ${numToCurrency(widget.trade.margin!, '2')}',
+                  widget.trade.sell == true
+                  ? 'Trade action: Sell'
+                  : 'Trade action: Buy',
                   style: const TextStyle(fontSize: 14),
-                  semanticsLabel:
-                      'Margin Used ${numToCurrency(widget.trade.margin!, '2')}',
                 ),
               const SizedBox(height: 8),
               Row(
@@ -212,6 +218,7 @@ class _TradeTileState extends ConsumerState<TradeTile> {
                               ref,
                               _getProfit(widget.trade, currentPrice),
                               widget.trade.stop_loss,
+                              widget.trade.leverage,
                               user.uid,
                               symbol,
                               widget.trade.TradeId,
@@ -235,7 +242,7 @@ class _TradeTileState extends ConsumerState<TradeTile> {
             ],
           ),
           subtitle: Text(
-            readTimestamp(widget.trade.date.millisecondsSinceEpoch),
+            'Trade placed on: ${readTimestamp(widget.trade.date.millisecondsSinceEpoch)}',
             style: const TextStyle(fontSize: 12),
             semanticsLabel:
                 'Trade date ${readTimestamp(widget.trade.date.millisecondsSinceEpoch)}',

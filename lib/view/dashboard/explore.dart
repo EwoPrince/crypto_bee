@@ -1,15 +1,20 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
+import 'package:crypto_beam/provider/chat_provider.dart';
 import 'package:crypto_beam/services/transfer_service.dart';
 import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/Recieve/Deposit.dart';
 import 'package:crypto_beam/view/account/general_setting.dart';
+import 'package:crypto_beam/view/notification/notification_list.dart';
 import 'package:crypto_beam/view/send/Transfer.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:crypto_beam/view/swap/swap.dart';
+import 'package:crypto_beam/view/userguild/additonal_res.dart';
 import 'package:crypto_beam/widgets/button.dart';
 import 'package:crypto_beam/widgets/column_with_spacing.dart';
+import 'package:crypto_beam/widgets/stakeBS.dart';
 import 'package:crypto_beam/widgets/walletBS.dart';
 import 'package:crypto_beam/x.dart';
+import 'package:crypto_beam/x.dart' as x;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,11 +23,12 @@ import 'package:crypto_beam/view/asset/btcAsset.dart';
 import 'package:crypto_beam/view/asset/dogeAsset.dart';
 import 'package:crypto_beam/view/asset/ethAsset.dart';
 import 'package:crypto_beam/view/asset/solAsset.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Utility functions
 String numToCrypto(double value) {
   return value
-      .toStringAsFixed(6)
+      .toStringAsFixed(2)
       .replaceAll(RegExp(r'0+$'), '')
       .replaceAll(RegExp(r'\.$'), '');
 }
@@ -88,7 +94,6 @@ class _ExploreState extends ConsumerState<Explore>
     _tabController = TabController(length: 2, vsync: this);
   }
 
-
   @override
   void dispose() {
     _tabController.dispose();
@@ -97,6 +102,7 @@ class _ExploreState extends ConsumerState<Explore>
 
   @override
   Widget build(BuildContext context) {
+    var unreadchat = ref.watch(chatProvider).unreadChat;
     final prices = ref.watch(priceProvider);
     final pricechange = ref.watch(priceChangesProvider);
     final user = ref.watch(authProvider).user;
@@ -201,7 +207,7 @@ class _ExploreState extends ConsumerState<Explore>
                     tooltip: 'Open wallet',
                   ),
                   Text(
-                    "Crypto Beam",
+                    "Beam",
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   Row(
@@ -230,8 +236,8 @@ class _ExploreState extends ConsumerState<Explore>
                                   minWidth: 16,
                                   minHeight: 16,
                                 ),
-                                child: const Text(
-                                  '3', // Placeholder; replace with dynamic count
+                                child: Text(
+                                  unreadchat.toString(),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -241,7 +247,8 @@ class _ExploreState extends ConsumerState<Explore>
                               ),
                             ),
                           ],
-                        ),
+                        ).onTap(() =>
+                            goto(context, NotificationList.routeName, null)),
                       ),
                     ],
                   ),
@@ -330,7 +337,7 @@ class _ExploreState extends ConsumerState<Explore>
                   ActionButton(
                     icon: Icons.more_horiz,
                     label: 'More',
-                    onTap: () {},
+                    onTap: () => goto(context, AdditonalRes.routeName, null),
                   ),
                 ],
               ),
@@ -341,14 +348,18 @@ class _ExploreState extends ConsumerState<Explore>
                     child: Container(
                       width: 150,
                       height: 100,
-                      child: const Center(child: Text("1V1 Trading Arena")),
+                      child: const Center(child: Text("1V1 Instant Trading")),
                     ),
-                  )).onTap(() {
-                    // Placeholder; replace with actual URL
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Feature coming soon')),
-                    );
-                  }),
+                  )).onTap(
+                    () {
+                      final btcPrice = prices['XBTUSD'] ?? 0.0;
+                      if (btcPrice == 0.0) {
+                        x.showMessage(context, 'BTC price not available');
+                        return;
+                      }
+                      showStakeBottomSheet(context, 'XBTUSD', btcPrice,);
+                    },
+                  ),
                   const SizedBox(width: 10),
                   Click(Card(
                     child: Container(
@@ -356,11 +367,14 @@ class _ExploreState extends ConsumerState<Explore>
                       height: 100,
                       child: const Center(child: Text("Puzzle Hunt")),
                     ),
-                  )).onTap(() {
+                  )).onTap(() async {
                     // Placeholder; replace with actual URL
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Feature coming soon')),
-                    );
+                    if (!await launchUrl(
+                      x.url2,
+                      mode: LaunchMode.externalApplication,
+                    )) {
+                      throw Exception('Could not launch ${x.url2}');
+                    }
                   }),
                 ],
               ),
@@ -386,7 +400,7 @@ class _ExploreState extends ConsumerState<Explore>
                 ),
               ),
               SizedBox(
-                height: 450,
+                height: 400,
                 child: TabBarView(
                   controller: _tabController,
                   children: [
@@ -410,7 +424,7 @@ class _ExploreState extends ConsumerState<Explore>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 8, vertical: 2),
                             child: Text(
-                             "${coin.percentageChange.toStringAsFixed(3)} % ",
+                              "${coin.percentageChange.toStringAsFixed(3)} % ",
                               style: TextStyle(
                                 color: coin.percentageChange.isNegative
                                     ? Colors.red
@@ -489,9 +503,9 @@ class _ExploreState extends ConsumerState<Explore>
       trailing: Column(
         children: [
           Text(
-              "24H change",
-              style: const TextStyle(color: Colors.white),
-            ),
+            "24H change",
+            style: const TextStyle(color: Colors.white),
+          ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(

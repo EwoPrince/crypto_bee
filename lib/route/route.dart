@@ -13,6 +13,8 @@ import 'package:crypto_beam/view/auth/login_step/signin.dart';
 import 'package:crypto_beam/view/auth/login_step/signup.dart';
 import 'package:crypto_beam/view/auth/onboarding.dart';
 import 'package:crypto_beam/view/dashboard/market.dart';
+import 'package:crypto_beam/view/notification/notification_list.dart';
+import 'package:crypto_beam/view/notification/notification_screen.dart';
 import 'package:crypto_beam/view/send/Transfer.dart';
 import 'package:crypto_beam/view/send/sendBNB.dart';
 import 'package:crypto_beam/view/send/sendBTC.dart';
@@ -829,5 +831,57 @@ final GoRouter router = GoRouter(
         );
       },
     ),
+
+
+    GoRoute(
+      path: NotificationList.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: NotificationList(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+
+
+
+    GoRoute(
+      path: NotificationScreen.routeName,
+      pageBuilder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>;
+
+        final name = extra['name'] as String;
+        final uid = extra['uid'] as String;
+        final recieverUserId = extra['recieverUserId'] as String;
+        final profilePic = extra['profilePic'] as String;
+
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: NotificationScreen(
+            name: name,
+            recieverUserId: recieverUserId,
+            profilePic: profilePic,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+
+
+
+
   ],
 );

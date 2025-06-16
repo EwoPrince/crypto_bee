@@ -105,7 +105,7 @@ class _YourAccountState extends State<YourAccount> {
                           SizedBox(
                             width: MediaQuery.of(context).size.width - 130,
                             child: Text(
-                              'Find out how you cound deactivate your account',
+                              'Find out how you could deactivate your account',
                               overflow: TextOverflow.ellipsis,
                               maxLines: 5,
                               softWrap: true,

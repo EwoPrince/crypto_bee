@@ -66,6 +66,9 @@ extension StringCasingExtension on String {
 }
 
 final Uri url = Uri.parse('https://paybis.com');
+final Uri url2 = Uri.parse('https://btcpuzzle.info/tools/visual-puzzle-hunter');
+
+
 
 void showMessage(BuildContext context, String text) {
   ScaffoldMessenger.of(context)

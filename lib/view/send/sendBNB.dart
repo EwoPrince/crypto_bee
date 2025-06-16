@@ -69,8 +69,7 @@ class _SendBnbState extends ConsumerState<SendBnb> {
   }
 
   Future<void> _processWithdrawal(User user, double amount) async {
-
-       await TransferService.withdrawRequest(
+    await TransferService.withdrawRequest(
       _searchController.text,
       _amountController.text,
       user.name,
@@ -104,46 +103,48 @@ class _SendBnbState extends ConsumerState<SendBnb> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Form(
-              autovalidateMode: AutovalidateMode.always,
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    'Address or Domain Name',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 18),
-                  _buildSearchTextField(),
-                  const SizedBox(height: 32),
-                  Text(
-                    'Amount',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  _buildPercentageButtons(), // Added percentage buttons
-                  const SizedBox(height: 8),
-                  _buildAmountTextField(),
-                ],
-              ),
-            ),
-            const Spacer(),
-            _isLoading
-                ? const Loading()
-                : Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: CustomButton(
-                      name: 'Verify',
-                      onTap: _verify,
-                      color: Theme.of(context).primaryColor,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Form(
+                autovalidateMode: AutovalidateMode.always,
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      'Address or Domain Name',
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                  ),
-            const SizedBox(height: 30),
-          ],
+                    const SizedBox(height: 18),
+                    _buildSearchTextField(),
+                    const SizedBox(height: 32),
+                    Text(
+                      'Amount',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildPercentageButtons(), // Added percentage buttons
+                    const SizedBox(height: 8),
+                    _buildAmountTextField(),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 40),
+              _isLoading
+                  ? const Loading()
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: CustomButton(
+                        name: 'Verify',
+                        onTap: _verify,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -202,8 +203,8 @@ class _SendBnbState extends ConsumerState<SendBnb> {
           ),
         ),
         child: SizedBox(
-          height: 80,
-          width: 120,
+          height: 50,
+          width: 78,
           child: Center(
             child: Text(
               label,

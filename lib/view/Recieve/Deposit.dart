@@ -26,7 +26,7 @@ class _RecieveBTCState extends State<Deposit> {
       body: Container(
         width: size.width,
         child: Padding(
-          padding: EdgeInsets.all(12.0),
+          padding: EdgeInsets.all(8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
