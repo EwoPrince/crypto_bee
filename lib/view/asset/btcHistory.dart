@@ -1,3 +1,4 @@
+import 'package:crypto_beam/model/transcation.dart';
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/provider/transcation_provider.dart';
 import 'package:crypto_beam/widgets/he3.dart';
@@ -7,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class BTCHistory extends ConsumerStatefulWidget {
-  const BTCHistory({super.key});
+  final String symbol;
+
+  const BTCHistory(this.symbol, {super.key});
 
   @override
   ConsumerState<BTCHistory> createState() => _BTCHistoryState();
@@ -64,10 +67,85 @@ class _BTCHistoryState extends ConsumerState<BTCHistory> {
               );
             }
             final data = ref.watch(transactionProvider).transactions;
-            final newdata = data
-                .where((element) =>
-                    element.transactionId.isNotEmpty && element.BTC != 0)
-                .toList();
+            List<Transaction> newdata = [];
+            if (widget.symbol == 'BTC') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.BTC != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'BNB') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.BNB != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'ETH') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.ETH != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'DOGE') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.DOGE != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'SOL') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.SOL != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'HMSTR') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.HMSTR != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'PEPE') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.PEPE != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'MNT') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.MNT != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'TRX') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.TRX != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'USDT') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.USDT != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'USDC') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.USDC != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'XRP') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.XRP != 0)
+                  .toList();
+            }
+            if (widget.symbol == 'X') {
+               newdata = data
+                  .where((element) =>
+                      element.transactionId.isNotEmpty && element.X != 0)
+                  .toList();
+            }
 
             return newdata.length == 0
                 ? Center(

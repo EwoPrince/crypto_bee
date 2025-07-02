@@ -3,12 +3,28 @@ import 'package:crypto_beam/view/Recieve/RecieveBNB.dart';
 import 'package:crypto_beam/view/Recieve/RecieveBTC.dart';
 import 'package:crypto_beam/view/Recieve/RecieveDoge.dart';
 import 'package:crypto_beam/view/Recieve/RecieveETH.dart';
+import 'package:crypto_beam/view/Recieve/RecieveHMSTR.dart';
+import 'package:crypto_beam/view/Recieve/RecieveMNT.dart';
+import 'package:crypto_beam/view/Recieve/RecievePEPE.dart';
 import 'package:crypto_beam/view/Recieve/RecieveSOL.dart';
+import 'package:crypto_beam/view/Recieve/RecieveTRX.dart';
+import 'package:crypto_beam/view/Recieve/RecieveUSDC.dart';
+import 'package:crypto_beam/view/Recieve/RecieveUSDT.dart';
+import 'package:crypto_beam/view/Recieve/RecieveX.dart';
+import 'package:crypto_beam/view/Recieve/RecieveXRP.dart';
 import 'package:crypto_beam/view/asset/bnbAsset.dart';
 import 'package:crypto_beam/view/asset/btcAsset.dart';
 import 'package:crypto_beam/view/asset/dogeAsset.dart';
 import 'package:crypto_beam/view/asset/ethAsset.dart';
+import 'package:crypto_beam/view/asset/hmstrAsset.dart';
+import 'package:crypto_beam/view/asset/mntAsset.dart';
+import 'package:crypto_beam/view/asset/pepeAsset.dart';
 import 'package:crypto_beam/view/asset/solAsset.dart';
+import 'package:crypto_beam/view/asset/trxAsset.dart';
+import 'package:crypto_beam/view/asset/usdcAsset.dart';
+import 'package:crypto_beam/view/asset/usdtAsset.dart';
+import 'package:crypto_beam/view/asset/xAsset.dart';
+import 'package:crypto_beam/view/asset/xrpAsset.dart';
 import 'package:crypto_beam/view/auth/login_step/signin.dart';
 import 'package:crypto_beam/view/auth/login_step/signup.dart';
 import 'package:crypto_beam/view/auth/onboarding.dart';
@@ -16,11 +32,7 @@ import 'package:crypto_beam/view/dashboard/market.dart';
 import 'package:crypto_beam/view/notification/notification_list.dart';
 import 'package:crypto_beam/view/notification/notification_screen.dart';
 import 'package:crypto_beam/view/send/Transfer.dart';
-import 'package:crypto_beam/view/send/sendBNB.dart';
 import 'package:crypto_beam/view/send/sendBTC.dart';
-import 'package:crypto_beam/view/send/sendDOGE.dart';
-import 'package:crypto_beam/view/send/sendETH.dart';
-import 'package:crypto_beam/view/send/sendSOL.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:crypto_beam/view/swap/swap.dart';
 import 'package:flutter/material.dart';
@@ -360,6 +372,135 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
+      path: HMSTRasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: HMSTRasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: PEPEasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: PEPEasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: MNTasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: MNTasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: TRXasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: TRXasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: USDTasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: USDTasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: USDCasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: USDCasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: XRPasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: XRPasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: Xasset.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: Xasset(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+
+    GoRoute(
       path: Deposit.routeName,
       pageBuilder: (context, state) {
         return CustomTransitionPage(
@@ -471,12 +612,148 @@ final GoRouter router = GoRouter(
         );
       },
     ),
+    
+    GoRoute(
+      path: RecievePEPE.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecievePEPE(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: RecieveMNT.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveMNT(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: RecieveUSDC.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveUSDC(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    
+    GoRoute(
+      path: RecieveUSDT.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveUSDT(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: RecieveTRX.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveTRX(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    
+    GoRoute(
+      path: RecieveHMSTR.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveHMSTR(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    GoRoute(
+      path: RecieveX.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveX(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+    
+    GoRoute(
+      path: RecieveXRP.routeName,
+      pageBuilder: (context, state) {
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: RecieveXRP(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(
+              opacity:
+                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
+              child: child,
+            );
+          },
+        );
+      },
+    ),
+
     GoRoute(
       path: Sendbtc.routeName,
       pageBuilder: (context, state) {
+        final symbol = state.extra as String;
         return CustomTransitionPage(
           key: state.pageKey,
-          child: Sendbtc(),
+          child: Sendbtc(
+            symbol: symbol,
+          ),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(
               opacity:
@@ -487,70 +764,8 @@ final GoRouter router = GoRouter(
         );
       },
     ),
-    GoRoute(
-      path: SendBnb.routeName,
-      pageBuilder: (context, state) {
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: SendBnb(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity:
-                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-              child: child,
-            );
-          },
-        );
-      },
-    ),
-    GoRoute(
-      path: Sendeth.routeName,
-      pageBuilder: (context, state) {
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: Sendeth(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity:
-                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-              child: child,
-            );
-          },
-        );
-      },
-    ),
-    GoRoute(
-      path: Senddoge.routeName,
-      pageBuilder: (context, state) {
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: Senddoge(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity:
-                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-              child: child,
-            );
-          },
-        );
-      },
-    ),
-    GoRoute(
-      path: Sendsol.routeName,
-      pageBuilder: (context, state) {
-        return CustomTransitionPage(
-          key: state.pageKey,
-          child: Sendsol(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity:
-                  CurveTween(curve: Curves.easeInOutCirc).animate(animation),
-              child: child,
-            );
-          },
-        );
-      },
-    ),
+
+
     GoRoute(
       path: Stake.routeName,
       pageBuilder: (context, state) {
@@ -858,7 +1073,6 @@ final GoRouter router = GoRouter(
         final extra = state.extra as Map<String, dynamic>;
 
         final name = extra['name'] as String;
-        final uid = extra['uid'] as String;
         final recieverUserId = extra['recieverUserId'] as String;
         final profilePic = extra['profilePic'] as String;
 

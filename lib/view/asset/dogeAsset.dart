@@ -1,8 +1,8 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/Recieve/RecieveDoge.dart';
-import 'package:crypto_beam/view/asset/dogeHistory.dart';
-import 'package:crypto_beam/view/send/sendDOGE.dart';
+import 'package:crypto_beam/view/asset/btcHistory.dart';
+import 'package:crypto_beam/view/send/sendBTC.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:crypto_beam/view/swap/swap.dart';
 import 'package:crypto_beam/x.dart';
@@ -119,7 +119,7 @@ class _DOGEassetState extends ConsumerState<DOGEasset> {
                   label: 'Send',
                   tooltip: 'Send DOGE',
                   onTap: () {
-                    goto(context, Senddoge.routeName, null);
+                    goto(context, Sendbtc.routeName, 'DOGE');
                   },
                 ),
                 _buildActionButton(
@@ -154,14 +154,14 @@ class _DOGEassetState extends ConsumerState<DOGEasset> {
                       showMessage(
                           context, 'You don\'t have enough DOGE to swap.');
                     } else {
-                      goto(context, Swapcoin.routeName, 'BNBUSD');
+                      goto(context, Swapcoin.routeName, 'XDGUSD');
                     }
                   },
                 ),
               ],
             ),
             SizedBox(height: 20),
-            Expanded(child: DogeHistory()),
+            Expanded(child: BTCHistory('DOGE')),
             Divider(),
             Text(
               'Current DOGE Price',

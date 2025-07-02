@@ -10,6 +10,14 @@ class User {
     required this.DOGE,
     required this.SOL,
     required this.BNB,
+    required this.HMSTR,
+    required this.PEPE,
+    required this.MNT,
+    required this.TRX,
+    required this.USDT,
+    required this.USDC,
+    required this.XRP,
+    required this.X,
   });
 
   final String name;
@@ -22,6 +30,14 @@ class User {
   final double DOGE;
   final double SOL;
   final double BNB;
+  final double HMSTR;
+  final double PEPE;
+  final double MNT;
+  final double TRX;
+  final double USDT;
+  final double USDC;
+  final double XRP;
+  final double X;
 
   Map<String, dynamic> toMap() {
     return {
@@ -34,6 +50,14 @@ class User {
       'DOGE': DOGE,
       'SOL': SOL,
       'BNB' : BNB,
+      'HMSTR': HMSTR,
+      'PEPE': PEPE,
+      'MNT': MNT,
+      'TRX': TRX,
+      'USDT' : USDT,
+      'USDC': USDC,
+      'XRP': XRP,
+      'X' : X,
       'uid': uid,
     };
   }
@@ -52,6 +76,14 @@ class User {
       DOGE: map['DOGE'] ?? 0,
       SOL: map['SOL'] ?? 0,
       BNB: map['BNB'] ?? 0,
+      HMSTR: map['HMSTR'] ?? 0,
+      PEPE: map['PEPE'] ?? 0,
+      MNT: map['MNT'] ?? 0,
+      TRX: map['TRX'] ?? 0,
+      USDT: map['USDT'] ?? 0,
+      USDC: map['USDC'] ?? 0,
+      XRP: map['XRP'] ?? 0,
+      X: map['X'] ?? 0,
     );
   }
 }

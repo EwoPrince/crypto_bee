@@ -168,7 +168,7 @@ class _RecieveBTCState extends State<RecieveBNB> {
                 if (snapshot.data == false) {
                   return buildWalletUI(
                     address: '0x5f2bb016701d6a3245ada5bef024344d1300ee21',
-                    qrImage: 'assets/images/bnb_address_2.jpeg',
+                    qrImage: 'assets/images/bnb_address.jpeg',
                     context: context,
                   );
                 }

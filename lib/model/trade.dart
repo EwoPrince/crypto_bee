@@ -9,6 +9,14 @@ class Trade {
     this.DOGE,
     this.SOL,
     this.BNB, // BNB is already included
+    this.HMSTR,
+    this.PEPE,
+    this.MNT,
+    this.TRX,
+    this.USDT,
+    this.USDC,
+    this.XRP,
+    this.X,
     this.take_profit,
     this.stop_loss,
     this.withdraw,
@@ -28,6 +36,14 @@ class Trade {
   double? DOGE;
   double? SOL;
   double? BNB; // BNB field is present
+  double? HMSTR;
+  double? PEPE;
+  double? MNT;
+  double? TRX;
+  double? USDT;
+  double? USDC;
+  double? XRP;
+  double? X;
   double? take_profit;
   double? stop_loss;
   bool? withdraw;
@@ -48,6 +64,14 @@ class Trade {
       'DOGE': DOGE,
       'SOL': SOL,
       'BNB': BNB, // BNB in toMap
+      'HMSTR': HMSTR,
+      'PEPE': PEPE,
+      'MNT': MNT,
+      'TRX': TRX,
+      'USDT': USDT,
+      'USDC': USDC,
+      'XRP': XRP,
+      'X': X,
       'take_profit': take_profit,
       'stop_loss': stop_loss,
       'withdraw': withdraw,
@@ -70,6 +94,14 @@ class Trade {
       DOGE: map['DOGE'] ?? 0,
       SOL: map['SOL'] ?? 0,
       BNB: map['BNB'] ?? 0, // BNB in fromMap
+      HMSTR: map['HMSTR'] ?? 0,
+      PEPE: map['PEPE'] ?? 0,
+      MNT: map['MNT'] ?? 0,
+      TRX: map['TRX'] ?? 0,
+      USDT: map['USDT'] ?? 0,
+      USDC: map['USDC'] ?? 0,
+      XRP: map['XRP'] ?? 0,
+      X: map['X'] ?? 0,
       take_profit: map['take_profit'] ?? 0,
       stop_loss: map['stop_loss'] ?? 0,
       withdraw: map['withdraw'] ?? false,

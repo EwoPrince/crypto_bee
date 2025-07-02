@@ -118,7 +118,7 @@ class _BtcassetState extends ConsumerState<Btcasset> {
                     label: 'Send',
                     tooltip: 'Send BTC',
                     onTap: () {
-                      goto(context, Sendbtc.routeName, null);
+                      goto(context, Sendbtc.routeName, 'BTC');
                     }),
                 _buildActionButton(
                     icon: Icons.arrow_downward,
@@ -153,7 +153,7 @@ class _BtcassetState extends ConsumerState<Btcasset> {
               ],
             ),
             SizedBox(height: 20),
-            Expanded(child: BTCHistory()),
+            Expanded(child: BTCHistory('BTC')),
             Divider(),
             Text(
               'Current BTC price',

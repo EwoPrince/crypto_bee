@@ -4,11 +4,11 @@ import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/view/dashboard/land.dart';
 import 'package:crypto_beam/view/userguild/networkIssuse.dart';
 import 'package:crypto_beam/widgets/loading.dart';
-import 'package:crypto_beam/x.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:crypto_beam/states/repository.dart';
+
 
 // Price provider for storing cryptocurrency prices
 final priceProvider = StateNotifierProvider<PriceNotifier, Map<String, double>>(
@@ -43,6 +43,8 @@ class _VerifiedStateState extends ConsumerState<VerifiedState>
   String? errorMessage;
   Timer? _textCycleTimer;
 
+
+
   final startList = [
     "Getting CryptoBeam Ready",
     "Fetching Market Data",
@@ -50,7 +52,8 @@ class _VerifiedStateState extends ConsumerState<VerifiedState>
     "Preparing Charts",
   ];
 
-  Future<bool> start({int retryCount = 0, int maxRetries = 3}) async {
+
+  Future<bool> start({int retryCount = 0, int maxRetries = 6}) async {
     if (retryCount >= maxRetries) {
       setState(() {
         errorMessage =
@@ -63,50 +66,66 @@ class _VerifiedStateState extends ConsumerState<VerifiedState>
       if (user == null) {
         throw Exception('No user logged in');
       }
-
       await ref.read(authProvider).getCurrentUser(user.uid);
-
-      final prices = await repository.getCryptoPrices([
+      
+      // Get both prices and price changes in one call
+      final (priceChanges, prices) = await repository.getCryptoPriceChanges([
         'bitcoin',
         'ethereum',
         'solana',
         'dogecoin',
         'binancecoin',
+        'hamster-kombat',
+        'mantle',
+        'pepe',
+        'ripple',
+        'tether',
+        'tron',
+        // 'x'
       ]);
 
-      // Map CoinGecko coin IDs to Kraken-style pair names
+      // Map CoinGecko coin IDs to Kraken-style pair names for prices
       final priceMap = {
         'XBTUSD': prices['bitcoin'] ?? 0.0,
         'ETHUSD': prices['ethereum'] ?? 0.0,
         'SOLUSD': prices['solana'] ?? 0.0,
         'XDGUSD': prices['dogecoin'] ?? 0.0,
         'BNBUSD': prices['binancecoin'] ?? 0.0,
+        'HMSTRUSD': prices['hamster-kombat'] ?? 0.0,
+        'PEPEUSD': prices['pepe'] ?? 0.0,
+        'MNTUSD': prices['mantle'] ?? 0.0,
+        'TRXUSD': prices['tron'] ?? 0.0,
+        'USDTUSD': prices['tether'] ?? 0.0,
+        'USDCUSD': prices['tether'] ?? 0.0,
+        'XRPUSD': prices['ripple'] ?? 0.0,
+        'XUSD': prices['pepe'] ?? 0.0,
       };
       print('Prices: $priceMap');
 
-      final pricechanges = await repository.getCryptoPriceChanges([
-        'bitcoin',
-        'ethereum',
-        'solana',
-        'dogecoin',
-        'binancecoin',
-      ]);
-
+      // Map CoinGecko coin IDs to Kraken-style pair names for price changes
       final priceChangeMap = {
-        'XBTUSD': pricechanges['bitcoin'] ?? 0.0,
-        'ETHUSD': pricechanges['ethereum'] ?? 0.0,
-        'SOLUSD': pricechanges['solana'] ?? 0.0,
-        'XDGUSD': pricechanges['dogecoin'] ?? 0.0,
-        'BNBUSD': pricechanges['binancecoin'] ?? 0.0,
+        'XBTUSD': priceChanges['bitcoin'] ?? 0.0,
+        'ETHUSD': priceChanges['ethereum'] ?? 0.0,
+        'SOLUSD': priceChanges['solana'] ?? 0.0,
+        'XDGUSD': priceChanges['dogecoin'] ?? 0.0,
+        'BNBUSD': priceChanges['binancecoin'] ?? 0.0,
+        'HMSTRUSD': priceChanges['hamster-kombat'] ?? 0.0,
+        'PEPEUSD': priceChanges['pepe'] ?? 0.0,
+        'MNTUSD': priceChanges['mantle'] ?? 0.0,
+        'TRXUSD': priceChanges['tron'] ?? 0.0,
+        'USDTUSD': priceChanges['tether'] ?? 0.0,
+        'USDCUSD': priceChanges['tether'] ?? 0.0,
+        'XRPUSD': priceChanges['ripple'] ?? 0.0,
+        'XUSD': priceChanges['dogecoin'] ?? 0.0,
       };
-      print('Prices: $priceChangeMap');
+      print('Price Changes: $priceChangeMap');
 
       ref.read(priceProvider.notifier).state = priceMap;
       ref.read(priceChangesProvider.notifier).state = priceChangeMap;
-
       ref.read(authProvider).listenTocurrentUserNotifier(user.uid);
       return true;
     } catch (e, st) {
+      print(st);
       setState(() {
         errorMessage = e.toString().contains('Rate limit')
             ? 'Rate limit exceeded. Retrying in 30 seconds...'
@@ -198,11 +217,10 @@ class _VerifiedStateState extends ConsumerState<VerifiedState>
               ),
             ),
           );
-        } 
+        }
 
         if (snapshot.data == true) {
-          //  become(context, Land.routeName, null);
-        return  Land();
+          return Land();
         }
 
         if (snapshot.data == false) {

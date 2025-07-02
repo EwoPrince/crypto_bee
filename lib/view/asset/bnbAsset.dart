@@ -1,8 +1,8 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/Recieve/RecieveBNB.dart';
-import 'package:crypto_beam/view/asset/bnbHistory.dart';
-import 'package:crypto_beam/view/send/sendBNB.dart';
+import 'package:crypto_beam/view/asset/btcHistory.dart';
+import 'package:crypto_beam/view/send/sendBTC.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:crypto_beam/view/swap/swap.dart';
 import 'package:crypto_beam/x.dart';
@@ -121,7 +121,7 @@ class _BnbassetState extends ConsumerState<Bnbasset> {
                   label: 'Send',
                   tooltip: 'Send BNB',
                   onTap: () {
-                    goto(context, SendBnb.routeName, null);
+                    goto(context, Sendbtc.routeName, 'BNB');
                   },
                 ),
                 _buildActionButton(
@@ -163,7 +163,7 @@ class _BnbassetState extends ConsumerState<Bnbasset> {
               ],
             ),
             SizedBox(height: 20),
-            Expanded(child: BNBHistory()),
+            Expanded(child: BTCHistory('BNB')),
             Divider(),
             Text(
               'Current BNB Price',

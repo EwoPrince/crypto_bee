@@ -1,8 +1,8 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/Recieve/RecieveSOL.dart';
-import 'package:crypto_beam/view/asset/solHistory.dart';
-import 'package:crypto_beam/view/send/sendSOL.dart';
+import 'package:crypto_beam/view/asset/btcHistory.dart';
+import 'package:crypto_beam/view/send/sendBTC.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:crypto_beam/view/swap/swap.dart';
 import 'package:crypto_beam/x.dart';
@@ -119,7 +119,7 @@ class _SOLassetState extends ConsumerState<SOLasset> {
                     label: 'Send',
                     tooltip: 'Send SOL',
                     onTap: () {
-                      goto(context, Sendsol.routeName, null);
+                      goto(context, Sendbtc.routeName, 'SOL');
                     },
                   ),
                   _buildActionButton(
@@ -161,7 +161,7 @@ class _SOLassetState extends ConsumerState<SOLasset> {
                 ],
               ),
               SizedBox(height: 20),
-              Expanded(child: SOLHistory()),
+              Expanded(child: BTCHistory('SOL')),
               Divider(),
               Text(
                 'Current SOL Price',

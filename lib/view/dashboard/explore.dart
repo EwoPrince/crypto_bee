@@ -4,6 +4,14 @@ import 'package:crypto_beam/services/transfer_service.dart';
 import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/Recieve/Deposit.dart';
 import 'package:crypto_beam/view/account/general_setting.dart';
+import 'package:crypto_beam/view/asset/hmstrAsset.dart';
+import 'package:crypto_beam/view/asset/mntAsset.dart';
+import 'package:crypto_beam/view/asset/pepeAsset.dart';
+import 'package:crypto_beam/view/asset/trxAsset.dart';
+import 'package:crypto_beam/view/asset/usdcAsset.dart';
+import 'package:crypto_beam/view/asset/usdtAsset.dart';
+import 'package:crypto_beam/view/asset/xAsset.dart';
+import 'package:crypto_beam/view/asset/xrpAsset.dart';
 import 'package:crypto_beam/view/notification/notification_list.dart';
 import 'package:crypto_beam/view/send/Transfer.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
@@ -143,6 +151,62 @@ class _ExploreState extends ConsumerState<Explore>
         percentageChange: pricechange['BNBUSD'] ?? 0.00,
         balance: '\$ ${numToCrypto(user.BNB * (prices['BNBUSD'] ?? 1))}',
       ),
+      CoinData(
+        pair: 'HMSTRUSD',
+        displayName: 'HMSTR/USDT',
+        price: prices['HMSTRUSD'] ?? 0.0,
+        percentageChange: pricechange['HMSTRUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.HMSTR * (prices['HMSTRUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'PEPEUSD',
+        displayName: 'PEPE/USDT',
+        price: prices['PEPEUSD'] ?? 0.0,
+        percentageChange: pricechange['PEPEUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.PEPE * (prices['PEPEUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'MNTUSD',
+        displayName: 'MNT/USDT',
+        price: prices['MNTUSD'] ?? 0.0,
+        percentageChange: pricechange['MNTUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.MNT * (prices['MNTUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'TRXUSD',
+        displayName: 'TRX/USDT',
+        price: prices['TRXUSD'] ?? 0.0,
+        percentageChange: pricechange['TRXUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.TRX * (prices['TRXUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'USDTUSD',
+        displayName: 'USDT/USDT',
+        price: prices['USDTUSD'] ?? 0.0,
+        percentageChange: pricechange['USDTUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.USDT * (prices['USDTUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'USDCUSD',
+        displayName: 'USDC/USDT',
+        price: prices['USDCUSD'] ?? 0.0,
+        percentageChange: pricechange['USDCUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.USDC * (prices['USDCUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'XRPUSD',
+        displayName: 'XRP/USDT',
+        price: prices['XRPUSD'] ?? 0.0,
+        percentageChange: pricechange['XRPUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.XRP * (prices['XRPUSD'] ?? 1))}',
+      ),
+      CoinData(
+        pair: 'XUSD',
+        displayName: 'X/USDT',
+        price: prices['XUSD'] ?? 0.0,
+        percentageChange: pricechange['XUSD'] ?? 0.00,
+        balance: '\$ ${numToCrypto(user.X * (prices['XUSD'] ?? 1))}',
+      ),
     ];
 
     final tradingCoins = [
@@ -185,6 +249,70 @@ class _ExploreState extends ConsumerState<Explore>
         hasFireIcon: true,
         hasLaunchpool: true,
         route: Bnbasset.routeName,
+      ),
+      TradingCoin(
+        name: 'HMSTR',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['HMSTRUSD'] ?? 0.0, '2'),
+        change24h: pricechange['HMSTRUSD'] ?? 0.00,
+        hasFireIcon: false,
+        route: HMSTRasset.routeName,
+      ),
+      TradingCoin(
+        name: 'PEPE',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['PEPEUSD'] ?? 0.0, '2'),
+        change24h: pricechange['PEPEUSD'] ?? 0.00,
+        hasFireIcon: true,
+        route: PEPEasset.routeName,
+      ),
+      TradingCoin(
+        name: 'MNT',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['MNTUSD'] ?? 0.0, '2'),
+        change24h: pricechange['MNTUSD'] ?? 0.00,
+        hasFireIcon: true,
+        route: MNTasset.routeName,
+      ),
+      TradingCoin(
+        name: 'TRX',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['TRXUSD'] ?? 0.0, '2'),
+        change24h: pricechange['TRXUSD'] ?? 0.00,
+        hasFireIcon: true,
+        route: TRXasset.routeName,
+      ),
+      TradingCoin(
+        name: 'USDT',
+        tradingPair: '/USD',
+        price: numToCurrency(prices['USDTUSD'] ?? 0.0, '2'),
+        change24h: pricechange['USDTUSD'] ?? 0.00,
+        hasFireIcon: true,
+        route: USDTasset.routeName,
+      ),
+      TradingCoin(
+        name: 'USDC',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['USDCUSD'] ?? 0.0, '2'),
+        change24h: pricechange['USDCUSD'] ?? 0.00,
+        hasFireIcon: false,
+        route: USDCasset.routeName,
+      ),
+      TradingCoin(
+        name: 'XRP',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['XRPUSD'] ?? 0.0, '2'),
+        change24h: pricechange['XRPUSD'] ?? 0.00,
+        hasFireIcon: true,
+        route: XRPasset.routeName,
+      ),
+      TradingCoin(
+        name: 'X',
+        tradingPair: '/USDT',
+        price: numToCurrency(prices['XUSD'] ?? 0.0, '2'),
+        change24h: pricechange['XUSD'] ?? 0.00,
+        hasFireIcon: false,
+        route: Xasset.routeName,
       ),
     ];
 
@@ -274,7 +402,7 @@ class _ExploreState extends ConsumerState<Explore>
                                   ),
                                 ),
                                 CustomButton(
-                                  name: "Deposit Now",
+                                  name: "Purchase Crypto",
                                   onTap: () =>
                                       goto(context, Deposit.routeName, null),
                                   color: Theme.of(context).primaryColor,
@@ -400,7 +528,7 @@ class _ExploreState extends ConsumerState<Explore>
                 ),
               ),
               SizedBox(
-                height: 400,
+                height: 1000,
                 child: TabBarView(
                   controller: _tabController,
                   children: [

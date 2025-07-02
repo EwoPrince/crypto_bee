@@ -17,8 +17,7 @@ class NotificationList extends ConsumerStatefulWidget {
 }
 
 class _NotificationListState extends ConsumerState<NotificationList> {
-  @override
-   late Future futureHolder;
+  late Future futureHolder;
 
   Future<bool> fetchdata() async {
     final user = ref.read(authProvider).user;

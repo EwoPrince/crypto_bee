@@ -10,25 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:crypto_beam/x.dart';
 
-// Utility functions from Explore
-String numToCrypto(double value) {
-  return value
-      .toStringAsFixed(6)
-      .replaceAll(RegExp(r'0+$'), '')
-      .replaceAll(RegExp(r'\.$'), '');
-}
-
-String numToCurrency(double value, String decimals) {
-  return '\$${value.toStringAsFixed(int.parse(decimals))}';
-}
-
-// Show message utility
-void showMessage(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
-}
-
 class Swapcoin extends ConsumerStatefulWidget {
   final String? symbol;
   const Swapcoin({this.symbol, super.key});
@@ -54,6 +35,14 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
     {'pair': 'ETHUSD', 'label': 'ETH'},
     {'pair': 'XDGUSD', 'label': 'DOGE'},
     {'pair': 'SOLUSD', 'label': 'SOL'},
+    {'pair': 'HMSTRUSD', 'label': 'HMSTR'},
+    {'pair': 'PEPEUSD', 'label': 'PEPE'},
+    {'pair': 'MNTUSD', 'label': 'MNT'},
+    {'pair': 'TRXUSD', 'label': 'TRX'},
+    {'pair': 'USDTUSD', 'label': 'USDT'},
+    {'pair': 'USDCUSD', 'label': 'USDC'},
+    {'pair': 'XRPUSD', 'label': 'XRP'},
+    {'pair': 'XUSD', 'label': 'X'},
   ];
 
   @override
@@ -143,8 +132,22 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
         return user.DOGE;
       case 'SOLUSD':
         return user.SOL;
-      case 'BNBUSD':
-        return user.BNB;
+      case 'HMSTRUSD':
+        return user.HMSTR;
+      case 'PEPEUSD':
+        return user.PEPE;
+      case 'MNTUSD':
+        return user.MNT;
+      case 'TRXUSD':
+        return user.TRX;
+      case 'USDTUSD':
+        return user.USDT;
+      case 'USDCUSD':
+        return user.USDC;
+      case 'XRPUSD':
+        return user.XRP;
+      case 'XUSD':
+        return user.X;
       default:
         return 0.0;
     }
@@ -158,22 +161,30 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
         return "BTC";
       case 'BTCUSD':
         return "BTC";
-      case 'ETH':
-        return "ETH";
       case 'ETHUSD':
         return "ETH";
-      case 'DOGE':
-        return "DOGE";
       case 'XDGUSD':
         return "DOGE";
-      case 'SOL':
-        return "SOL";
       case 'SOLUSD':
         return "SOL";
-      case 'BNB':
-        return "BNB";
       case 'BNBUSD':
         return "BNB";
+      case 'HMSTRUSD':
+        return "HMSTR";
+      case 'PEPEUSD':
+        return "PEPE";
+      case 'MNTUSD':
+        return "MNT";
+      case 'TRXUSD':
+        return "TRX";
+      case 'USDTUSD':
+        return "USDT";
+      case 'USDCUSD':
+        return "USDC";
+      case 'XRPUSD':
+        return "XRP";
+      case 'XUSD':
+        return "X";
       default:
         return "BTC";
     }
@@ -290,12 +301,6 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // const SizedBox(height: 16),
-                    // Text(
-                    //   'Convert from',
-                    //   style: Theme.of(context).textTheme.bodyMedium,
-                    //   semanticsLabel: 'Source cryptocurrency',
-                    // ),
                     const SizedBox(height: 8),
                     _buildSearchTextField(),
                     const SizedBox(height: 24),
@@ -396,22 +401,6 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
         ),
       ],
     );
-
-    // CustomTextField(
-    //   labelText: 'Receive Amount ($currentLabel)',
-    //   hintText: 'Enter amount in $currentLabel',
-    //   controller: _amountController,
-    //   keyboardType: TextInputType.number,
-    //   prefixIcon: const Icon(Icons.dialpad),
-    //   maxLines: 1,
-    //   validator: (value) {
-    //     if (value == null || value.isEmpty) {
-    //       return 'Enter amount in $currentLabel';
-    //     }
-    //     return null;
-    //   },
-    //   // semanticsLabel: 'Receive amount in $currentLabel',
-    // );
   }
 
   Widget _buildSwapButtons() {
@@ -474,6 +463,22 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
         return 'assets/images/doge.png';
       case 'SOL':
         return 'assets/images/sol.png';
+      case 'HMSTR':
+        return 'assets/images/hmstr.png';
+      case 'PEPE':
+        return 'assets/images/pepe.jpeg';
+      case 'MNT':
+        return 'assets/images/mnt.jpg';
+      case 'TRX':
+        return 'assets/images/TRX.png';
+      case 'USDT':
+        return 'assets/images/usdt.png';
+      case 'USDC':
+        return 'assets/images/usdc.png';
+      case 'XRP':
+        return 'assets/images/xrp.png';
+      case 'X':
+        return 'assets/images/x.png';
       default:
         return 'assets/images/default.png';
     }

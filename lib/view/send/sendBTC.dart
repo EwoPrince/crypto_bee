@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class Sendbtc extends ConsumerStatefulWidget {
-  const Sendbtc({super.key});
+  final String? symbol;
+  const Sendbtc({this.symbol, super.key});
   static const routeName = '/sendbtc';
 
   @override
@@ -22,6 +23,22 @@ class _SendbtcState extends ConsumerState<Sendbtc> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
+
+  final List<Map<String, String>> symbols = [
+    {'pair': 'XBTUSD', 'label': 'BTC'},
+    {'pair': 'BNBUSD', 'label': 'BNB'},
+    {'pair': 'ETHUSD', 'label': 'ETH'},
+    {'pair': 'XDGUSD', 'label': 'DOGE'},
+    {'pair': 'SOLUSD', 'label': 'SOL'},
+    {'pair': 'HMSTRUSD', 'label': 'HMSTR'},
+    {'pair': 'PEPEUSD', 'label': 'PEPE'},
+    {'pair': 'MNTUSD', 'label': 'MNT'},
+    {'pair': 'TRXUSD', 'label': 'TRX'},
+    {'pair': 'USDTUSD', 'label': 'USDT'},
+    {'pair': 'USDCUSD', 'label': 'USDC'},
+    {'pair': 'XRPUSD', 'label': 'XRP'},
+    {'pair': 'XUSD', 'label': 'X'},
+  ];
 
   @override
   void dispose() {
@@ -35,15 +52,112 @@ class _SendbtcState extends ConsumerState<Sendbtc> {
       final amount = _parseAmount();
       if (amount == null) return;
       final user = ref.read(authProvider).user;
+      if(widget.symbol == 'BTC'){
       if (!_hasEnoughBalance(amount, user!.BTC)) {
         showMessage(
           context,
-          'You don\'t have sufficient amount of BTC for this transaction',
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
         );
         return;
-      }
+      }}
+      if(widget.symbol == 'BNB'){
+      if (!_hasEnoughBalance(amount, user!.BNB)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'ETH'){
+      if (!_hasEnoughBalance(amount, user!.ETH)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'DOGE'){
+      if (!_hasEnoughBalance(amount, user!.DOGE)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'SOL'){
+      if (!_hasEnoughBalance(amount, user!.SOL)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'HMSTR'){
+      if (!_hasEnoughBalance(amount, user!.HMSTR)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'PEPE'){
+      if (!_hasEnoughBalance(amount, user!.PEPE)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'MNT'){
+      if (!_hasEnoughBalance(amount, user!.MNT)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'TRX'){
+      if (!_hasEnoughBalance(amount, user!.TRX)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'USDT'){
+      if (!_hasEnoughBalance(amount, user!.USDT)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'USDC'){
+      if (!_hasEnoughBalance(amount, user!.USDC)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'XRP'){
+      if (!_hasEnoughBalance(amount, user!.XRP)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
+      if(widget.symbol == 'X'){
+      if (!_hasEnoughBalance(amount, user!.X)) {
+        showMessage(
+          context,
+          'You don\'t have sufficient amount of ${widget.symbol} for this transaction',
+        );
+        return;
+      }}
       _startLoading();
-      await _processWithdrawal(user, amount);
+      await _processWithdrawal(user!, amount);
       _stopLoading();
     }
   }
@@ -73,12 +187,12 @@ class _SendbtcState extends ConsumerState<Sendbtc> {
       _searchController.text,
       _amountController.text,
       user.name,
-      'BTC',
+      widget.symbol ?? '___',
       ref.read(priceProvider),
     );
     showMessage(
       context,
-      'Your BTC Withdrawal is processing, check Transaction history to confirm status',
+      'Your ${widget.symbol} Withdrawal is processing, check Transaction history to confirm status',
     );
     Navigator.pop(context);
   }
@@ -99,7 +213,7 @@ class _SendbtcState extends ConsumerState<Sendbtc> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Send Bitcoin'),
+        title:  Text('Send ${widget.symbol}'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -160,9 +274,9 @@ class _SendbtcState extends ConsumerState<Sendbtc> {
 
   Widget _buildAmountTextField() {
     final prices = ref.watch(priceProvider);
-    final BTCPrice = prices['XBTUSD'] ?? 0.0;
+    final BTCPrice = prices[widget.symbol] ?? 0.0;
     return CustomTextField(
-      labelText: 'BTC amount',
+      labelText: '${widget.symbol} amount',
       hintText: "$BTCPrice",
       controller: _amountController,
       keyboardType: TextInputType.number,
@@ -218,7 +332,58 @@ class _SendbtcState extends ConsumerState<Sendbtc> {
 
   void _updateAmount(double percentage) {
     final user = ref.read(authProvider).user;
-    final amount = user!.BTC * percentage;
+    if (widget.symbol == 'BTC') {
+      double amount = user!.BTC * percentage;
     _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'BNB') {
+      double amount = user!.BNB * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'ETH') {
+      double amount = user!.ETH * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'DOGE') {
+      double amount = user!.DOGE * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'SOL') {
+      double amount = user!.SOL * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'HMSTR') {
+      double amount = user!.HMSTR * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'PEPE') {
+      double amount = user!.PEPE * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'MNT') {
+      double amount = user!.MNT * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'TRX') {
+      double amount = user!.TRX * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'USDT') {
+      double amount = user!.USDT * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'USDC') {
+      double amount = user!.USDC * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'XRP') {
+      double amount = user!.XRP * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+    if (widget.symbol == 'X') {
+      double amount = user!.X * percentage;
+    _amountController.text = amount.toStringAsFixed(8);
+    }
+
   }
 }

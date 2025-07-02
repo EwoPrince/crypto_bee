@@ -239,35 +239,35 @@ class KrakenRepository {
     }
   }
 
-  Future<Map<String, double>> getCryptoPrices(List<String> coinIds) async {
-    final ids = coinIds.join(',');
-    final apiUrl =
-        'https://api.coingecko.com/api/v3/simple/price?ids=$ids&vs_currencies=usd';
+  // Future<Map<String, double>> getCryptoPrices(List<String> coinIds) async {
+  //   final ids = coinIds.join(',');
+  //   final apiUrl =
+  //       'https://api.coingecko.com/api/v3/simple/price?ids=$ids&vs_currencies=usd';
 
-    try {
-      final response = await _client.get(Uri.parse(apiUrl));
-      if (response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        Map<String, double> prices = {};
+  //   try {
+  //     final response = await _client.get(Uri.parse(apiUrl));
+  //     if (response.statusCode == 200) {
+  //       final jsonData = jsonDecode(response.body);
+  //       Map<String, double> prices = {};
 
-        for (var id in coinIds) {
-          if (jsonData.containsKey(id) && jsonData[id].containsKey('usd')) {
-            prices[id] = jsonData[id]['usd'].toDouble();
-          }
-        }
-        return prices;
-      } else {
-        throw Exception(
-            'Failed to load prices. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      _logger.e('Error fetching prices: $e');
-      rethrow;
-    }
-  }
+  //       for (var id in coinIds) {
+  //         if (jsonData.containsKey(id) && jsonData[id].containsKey('usd')) {
+  //           prices[id] = jsonData[id]['usd'].toDouble();
+  //         }
+  //       }
+  //       return prices;
+  //     } else {
+  //       throw Exception(
+  //           'Failed to load prices. Status code: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     _logger.e('Error fetching prices: $e');
+  //     rethrow;
+  //   }
+  // }
 
   /// Fetches 24-hour percentage changes for trading pairs.
-  Future<Map<String, double>> getCryptoPriceChanges(
+  Future<(Map<String, double>, Map<String, double>)> getCryptoPriceChanges(
       List<String> coinIds) async {
     final ids = coinIds.join(',');
     final apiUrl =
@@ -280,17 +280,30 @@ class KrakenRepository {
         final jsonData = jsonDecode(response.body);
         print(jsonData);
         Map<String, double> changes = {};
+        Map<String, double> prices = {};
+        
         for (var id in coinIds) {
-          if (jsonData.containsKey(id) &&
-              jsonData[id].containsKey('usd_24h_change')) {
-            changes[id] =
-                jsonData[id]['usd_24h_change'].toDouble();
+          if (jsonData.containsKey(id)) {
+            if (jsonData[id].containsKey('usd_24h_change')) {
+              changes[id] = jsonData[id]['usd_24h_change'].toDouble();
+            } else {
+              _logger.w("No 24h change data for coin: $id");
+              changes[id] = 0.00;
+            }
+            
+            if (jsonData[id].containsKey('usd')) {
+              prices[id] = jsonData[id]['usd'].toDouble();
+            } else {
+              _logger.w("No price data for coin: $id");
+              prices[id] = 0.00;
+            }
           } else {
-            _logger.w("No 24h change data for coin: $id");
+            _logger.w("No data for coin: $id");
             changes[id] = 0.00;
+            prices[id] = 0.00;
           }
         }
-        return changes;
+        return (changes, prices);
       } else {
         throw FetchDataException(
             "Failed to load price changes from CoinGecko. Status code: ${response.statusCode}, Response: ${response.body}");
@@ -300,5 +313,5 @@ class KrakenRepository {
           'Error fetching price changes from CoinGecko: $e, Stack trace: $st');
       rethrow;
     }
-  }
+}
 }

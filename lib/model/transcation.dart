@@ -10,6 +10,14 @@ class Transaction {
     this.DOGE,
     this.SOL,
     this.BNB,
+    this.HMSTR,
+    this.PEPE,
+    this.MNT,
+    this.TRX,
+    this.USDT,
+    this.USDC,
+    this.XRP,
+    this.X,
     this.withdraw,
     this.processing,
     this.address,
@@ -25,6 +33,14 @@ class Transaction {
   double? DOGE;
   double? SOL;
   double? BNB;
+  double? HMSTR;
+  double? PEPE;
+  double? MNT;
+  double? TRX;
+  double? USDT;
+  double? USDC;
+  double? XRP;
+  double? X;
   bool? withdraw;
   bool? processing;
   bool? trade;
@@ -41,6 +57,14 @@ class Transaction {
       'DOGE': DOGE,
       'SOL': SOL,
       'BNB': BNB,
+      'HMSTR': HMSTR,
+      'PEPE': PEPE,
+      'MNT': MNT,
+      'TRX': TRX,
+      'USDT': USDT,
+      'USDC': USDC,
+      'XRP': XRP,
+      'X': X,
       'processing': processing,
       'withdraw': withdraw,
       'trade': trade,
@@ -59,6 +83,14 @@ class Transaction {
       DOGE: map['DOGE']?.toDouble() ?? 0.0,
       SOL: map['SOL']?.toDouble() ?? 0.0,
       BNB: map['BNB']?.toDouble() ?? 0.0,
+      HMSTR: map['HMSTR'] ?? 0,
+      PEPE: map['PEPE'] ?? 0,
+      MNT: map['MNT'] ?? 0,
+      TRX: map['TRX'] ?? 0,
+      USDT: map['USDT'] ?? 0,
+      USDC: map['USDC'] ?? 0,
+      XRP: map['XRP'] ?? 0,
+      X: map['X'] ?? 0,
       processing: map['processing'] ?? false,
       withdraw: map['withdraw'] ?? false,
       trade: map['trade'] ?? false,

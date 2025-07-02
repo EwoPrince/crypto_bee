@@ -31,6 +31,15 @@ class _StakeState extends ConsumerState<Stake> {
     'ETH/USD',
     'XDGUSD',
     'SOL/USD',
+    'BNBUSD',
+    'HMSTRUSD',
+    'PEPEUSD',
+    'MNTUSD',
+    'TRXUSD',
+    'USDTUSD',
+    'USDCUSD',
+    'XRPUSD',
+    'XUSD',
   ];
   String currentSymbol = "XBTUSD";
   double? _currentPrice;
@@ -355,11 +364,6 @@ class _StakeState extends ConsumerState<Stake> {
         onPressed: () => _showSymbolSelectionBottomSheet(context),
         child: Text(_formatSymbol(currentSymbol)),
       ),
-      // ToolBarAction(
-      //   width: 100,
-      //   onPressed: () => _showIntervalSelectionBottomSheet(context),
-      //   child: Text(currentInterval.toString().split('.').last),
-      // ),
       ToolBarAction(
         width: 85,
         color: Colors.red,
@@ -545,8 +549,6 @@ extension IntervalExtension on Interval {
         return 10080;
       case Interval.fifteenDays:
         return 21600;
-      default:
-        return 1;
     }
   }
 }

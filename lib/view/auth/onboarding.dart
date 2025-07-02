@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:crypto_beam/view/auth/login_step/signin.dart';
 import 'package:crypto_beam/view/auth/login_step/signup.dart';
 import 'package:crypto_beam/widgets/button.dart';
@@ -18,105 +17,88 @@ class Onboarding extends StatefulWidget {
 }
 
 class _OnboardingState extends State<Onboarding> {
-  final ScrollController _scrollController = ScrollController();
-  final ScrollController _mainScrollController = ScrollController();
-  Timer? _horizontalScrollTimer;
-  Timer? _verticalScrollTimer;
+  late ScrollController _scrollController1,
+      _scrollController2,
+      _scrollController3;
+  late ScrollController _mainScrollController;
+  Timer? _scrollTimer;
   Timer? _userInteractionTimer;
   bool _isUserScrolling = false;
-  bool _isVerticalAutoScrolling = false;
-  final double _horizontalScrollSpeed =
-      40.0; // Pixels per second for horizontal
-  final double _verticalScrollSpeed = 12.0; // Pixels per frame for vertical
+  final double _scrollSpeed = 40.0;
   final Duration _scrollInterval = const Duration(milliseconds: 30);
+  final Duration _restartDelay = const Duration(milliseconds: 100);
 
   @override
   void initState() {
     super.initState();
+    _mainScrollController = ScrollController();
+    _scrollController1 = ScrollController();
+    _scrollController2 = ScrollController();
+    _scrollController3 = ScrollController();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startHorizontalAutoScroll();
-      _startVerticalAutoScroll();
+      if (mounted) {
+        _startAutoScrollTimer();
+      }
     });
   }
 
   @override
   void dispose() {
-    _horizontalScrollTimer?.cancel();
-    _verticalScrollTimer?.cancel();
+    _scrollTimer?.cancel();
     _userInteractionTimer?.cancel();
-    _scrollController.dispose();
     _mainScrollController.dispose();
+    _scrollController1.dispose();
+    _scrollController2.dispose();
+    _scrollController3.dispose();
     super.dispose();
   }
 
-  void _startHorizontalAutoScroll() {
-    _horizontalScrollTimer?.cancel();
+  void _startAutoScrollTimer() {
+    _scrollTimer?.cancel();
     _userInteractionTimer?.cancel();
+    if (!mounted ||
+        !_scrollControllers().any((controller) => controller.hasClients)) {
+      Future.delayed(_restartDelay, () {
+        if (mounted) _startAutoScrollTimer();
+      });
+      return;
+    }
 
-    _startHorizontalAutoScroll();
+    Future.delayed(_restartDelay, () {
+      if (!mounted || _isUserScrolling) return;
 
-    _horizontalScrollTimer = Timer.periodic(_scrollInterval, (timer) {
-      if (!mounted || !_scrollController.hasClients || _isUserScrolling) {
-        timer.cancel();
-        return;
-      }
+      _scrollTimer = Timer.periodic(_scrollInterval, (timer) {
+        if (!mounted ||
+            _scrollControllers().any((controller) => !controller.hasClients) ||
+            _isUserScrolling) {
+          timer.cancel();
+          return;
+        }
+        _scrollControllers().forEach((controller) {
+          double maxExtent = controller.position.maxScrollExtent;
+          double currentPosition = controller.position.pixels;
+          double scrollAmount =
+              (_scrollSpeed * _scrollInterval.inMilliseconds / 1000.0);
+          double newPosition = currentPosition + scrollAmount;
 
-      final maxExtent = _scrollController.position.maxScrollExtent;
-      final currentPosition = _scrollController.position.pixels;
-      final scrollIncrement =
-          _horizontalScrollSpeed * _scrollInterval.inMilliseconds / 1000.0;
-      final newPosition = currentPosition + scrollIncrement;
-
-      if (newPosition >= maxExtent) {
-        _scrollController.animateTo(
-          _scrollController.position.minScrollExtent,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeInOut,
-        );
-      } else {
-        _scrollController.animateTo(
-          newPosition,
-          duration: _scrollInterval,
-          curve: Curves.linear,
-        );
-      }
+          if (newPosition >= maxExtent) {
+            controller.animateTo(
+              controller.position.minScrollExtent,
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeOut,
+            );
+          } else {
+            controller.jumpTo(newPosition);
+          }
+        });
+      });
     });
   }
 
-  void _startVerticalAutoScroll() {
-    _verticalScrollTimer?.cancel();
-    _userInteractionTimer?.cancel();
-    _startVerticalAutoScroll();
-
-    _verticalScrollTimer = Timer.periodic(_scrollInterval, (timer) {
-      if (!mounted ||
-          !_mainScrollController.hasClients ||
-          _isUserScrolling ||
-          !_isVerticalAutoScrolling) {
-        timer.cancel();
-        return;
-      }
-
-      final maxExtent = _mainScrollController.position.maxScrollExtent;
-      final currentPosition = _mainScrollController.position.pixels;
-      final newPosition = currentPosition + _verticalScrollSpeed;
-
-      if (newPosition >= maxExtent) {
-        _mainScrollController.animateTo(
-          _mainScrollController.position.minScrollExtent,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeOut,
-        );
-      } else {
-        _mainScrollController.animateTo(
-          newPosition,
-          duration: _scrollInterval,
-          curve: Curves.linear,
-        );
-      }
-    });
+  List<ScrollController> _scrollControllers() {
+    return [_scrollController1, _scrollController2, _scrollController3];
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -180,7 +162,6 @@ class _OnboardingState extends State<Onboarding> {
           ];
         },
         body: NotificationListener<ScrollNotification>(
-          
           child: SingleChildScrollView(
             controller: _mainScrollController,
             child: Padding(
@@ -217,23 +198,25 @@ class _OnboardingState extends State<Onboarding> {
   Widget _buildHeroSection(BuildContext context) {
     return Stack(
       children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: SizedBox(
-            width: 606,
-            height: 500,
-            child: SvgPicture.asset("assets/images/rewards.svg"),
-          ),
-        ),
+        // Align(
+        //   alignment: Alignment.centerRight,
+        //   child: SizedBox(
+        //     width: 606,
+        //     height: 500,
+        //     child: SvgPicture.asset("assets/images/rewards.svg"),
+        //   ),
+        // ),
         ColumnWithSpacing(
           spacing: 25,
           children: [
             Text(
               'Trade Beyond Limits with CryptoBeam',
+              textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineLarge,
             ),
             Text(
               'Unleash Crypto Freedom: Limitless, Trustworthy, and Sign-Up Free.',
+              textAlign: TextAlign.center,
               style: Theme.of(context)
                   .textTheme
                   .bodyMedium!
@@ -241,7 +224,7 @@ class _OnboardingState extends State<Onboarding> {
             ),
             CustomButton(
               color: Theme.of(context).primaryColor,
-              name: 'Start Trading',
+              name: 'Sign In',
               onTap: () => goto(context, Signin.routeName, null),
             ),
             _buildRatingRow(context),
@@ -318,10 +301,12 @@ class _OnboardingState extends State<Onboarding> {
       children: [
         Text(
           'Experience Seamless Interchain Integration',
+          textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         Text(
           'All your tokens, DeFi positions, NFT collections, and transaction history across all major networks.',
+          textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
               .bodyMedium!
@@ -374,11 +359,14 @@ class _OnboardingState extends State<Onboarding> {
               ColumnWithSpacing(
                 spacing: 10,
                 children: [
-                  Text(title, style: Theme.of(context).textTheme.headlineLarge),
+                  Text(title,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineLarge),
                   SizedBox(
                     width: 230,
                     child: Text(
                       description,
+                      textAlign: TextAlign.center,
                       style: Theme.of(context)
                           .textTheme
                           .bodyMedium!
@@ -471,6 +459,7 @@ class _OnboardingState extends State<Onboarding> {
                 width: 230,
                 child: Text(
                   description,
+                  textAlign: TextAlign.center,
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium!
@@ -490,10 +479,12 @@ class _OnboardingState extends State<Onboarding> {
       children: [
         Text(
           'Elevate Your Web3 Experience',
+          textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         Text(
           'All your tokens, DeFi positions, NFT collections, and transaction history across all major networks.',
+          textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
               .bodyMedium!
@@ -567,7 +558,7 @@ class _OnboardingState extends State<Onboarding> {
 
   Widget _buildCryptoCard(BuildContext context) {
     return SizedBox(
-      width: 320,
+      width: 4000,
       child: Card(
         child: Padding(
           padding: const EdgeInsets.all(5.0),
@@ -581,7 +572,7 @@ class _OnboardingState extends State<Onboarding> {
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
               SizedBox(
-                width: 230,
+                width: 300,
                 child: Text(
                   'Swap Bitcoin, Ethereum, all the most popular altcoins, and thousands of other crypto assets instantly.',
                   style: Theme.of(context)
@@ -595,11 +586,10 @@ class _OnboardingState extends State<Onboarding> {
               MouseRegion(
                 // onExit: (_) => _resumeAutoScrollAfterDelay(),
                 child: NotificationListener<ScrollNotification>(
-                 
                   child: SizedBox(
                     height: 105,
                     child: ListView(
-                      controller: _scrollController,
+                      controller: _scrollController1,
                       scrollDirection: Axis.horizontal,
                       children: [
                         crypbox("assets/images/mnt.svg"),
@@ -622,12 +612,11 @@ class _OnboardingState extends State<Onboarding> {
               ),
               MouseRegion(
                 child: NotificationListener<ScrollNotification>(
-                  
                   child: SizedBox(
                     height: 105,
                     child: ListView(
                       reverse: true,
-                      controller: _scrollController,
+                      controller: _scrollController2,
                       scrollDirection: Axis.horizontal,
                       children: [
                         crypbox("assets/images/avax.svg"),
@@ -708,6 +697,7 @@ class _OnboardingState extends State<Onboarding> {
               SizedBox(
                 width: 380,
                 child: Text(
+                  textAlign: TextAlign.center,
                   'Swaps supports 13 available and 18 on-demand blockchain integrations.',
                   style: Theme.of(context)
                       .textTheme
@@ -729,11 +719,10 @@ class _OnboardingState extends State<Onboarding> {
                         const SizedBox(height: 10),
                         MouseRegion(
                           child: NotificationListener<ScrollNotification>(
-                           
                             child: SizedBox(
                               height: 105,
                               child: ListView(
-                                controller: _scrollController,
+                                controller: _scrollController3,
                                 scrollDirection: Axis.horizontal,
                                 children: [
                                   crypbox("assets/images/sandbox.svg"),
@@ -858,12 +847,14 @@ class _OnboardingState extends State<Onboarding> {
               children: [
                 Text(
                   title,
+                  textAlign: TextAlign.start,
                   style: Theme.of(context).textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 10),
                 SizedBox(
                   width: 300,
                   child: Text(
+                    textAlign: TextAlign.start,
                     description,
                     style: Theme.of(context)
                         .textTheme
@@ -897,6 +888,7 @@ class _OnboardingState extends State<Onboarding> {
             ),
             const SizedBox(height: 10),
             Text(
+              textAlign: TextAlign.center,
               'Earn rewards effortlessly with high-yield opportunities and secure investments.',
               style: Theme.of(context)
                   .textTheme
@@ -937,6 +929,7 @@ class _OnboardingState extends State<Onboarding> {
                 SizedBox(
                   width: 450,
                   child: Text(
+                    textAlign: TextAlign.center,
                     'Instant swaps with cashback—trade seamlessly and earn rewards on every exchange. Enjoy fast, secure transactions with competitive rates while getting extra value on your trades. Swap assets effortlessly and maximize your returns with every transaction.',
                     style: Theme.of(context)
                         .textTheme

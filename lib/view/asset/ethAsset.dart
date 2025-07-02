@@ -1,8 +1,8 @@
 import 'package:crypto_beam/provider/auth_provider.dart';
 import 'package:crypto_beam/states/verified_state.dart';
 import 'package:crypto_beam/view/Recieve/RecieveETH.dart';
-import 'package:crypto_beam/view/asset/ethHistory.dart';
-import 'package:crypto_beam/view/send/sendETH.dart';
+import 'package:crypto_beam/view/asset/btcHistory.dart';
+import 'package:crypto_beam/view/send/sendBTC.dart';
 import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:crypto_beam/view/swap/swap.dart';
 import 'package:crypto_beam/x.dart';
@@ -119,7 +119,7 @@ class _ETHassetState extends ConsumerState<ETHasset> {
                   label: 'Send',
                   tooltip: 'Send ETH',
                   onTap: () {
-                    goto(context, Sendeth.routeName, null);
+                    goto(context, Sendbtc.routeName, 'ETH');
                   },
                 ),
                 _buildActionButton(
@@ -161,7 +161,7 @@ class _ETHassetState extends ConsumerState<ETHasset> {
               ],
             ),
             SizedBox(height: 20),
-            Expanded(child: ETHHistory()),
+            Expanded(child: BTCHistory('ETH')),
             Divider(),
             Text(
               'Current ETH Price',
