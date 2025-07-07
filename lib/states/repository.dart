@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:crypto_beam/candlestick/models/candle.dart';
-import 'package:crypto_beam/view/stake/stake.dart';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:logger/logger.dart';
+import 'package:crypto_beam/view/stake/stake.dart';
 
 class FetchDataException implements Exception {
   final String message;
@@ -37,8 +37,7 @@ class KrakenRepository {
   int _reconnectAttempts = 0;
   int _retryAttempts = 0;
 
-  WebSocketChannel establishConnection(String pair,
-      {Function(String)? onError}) {
+  WebSocketChannel establishConnection(String pair, {Function(String)? onError}) {
     _channel?.sink.close();
     _reconnectAttempts = 0;
     _currentPair = pair;
@@ -58,28 +57,30 @@ class KrakenRepository {
     _logger.i("Subscribed to ticker for pair: $pair");
   }
 
-  void _handleWebSocketEvents(WebSocketChannel channel,
-      {Function(String)? onError}) {
+  void _handleWebSocketEvents(WebSocketChannel channel, {Function(String)? onError}) {
     channel.stream.listen(
       (message) {
         try {
           final data = jsonDecode(message);
-          if (data is List && data.length > 1) {
-            _logger
-                .i("Received Ticker Data for pair $_currentPair: ${data[1]}");
-          } else if (data is Map && data['event'] == 'subscriptionStatus') {
-            _logger.i(
-                "Subscription status for pair $_currentPair: ${data['status']}");
+          if (data is Map && data['event'] == 'subscriptionStatus') {
+            _logger.i("Subscription status for pair $_currentPair: ${data['status']}");
             if (data['status'] == 'error') {
-              final errorMessage =
-                  "WebSocket subscription failed: ${data['errorMessage']}";
+              final errorMessage = "WebSocket subscription failed: ${data['errorMessage']}";
               onError?.call(errorMessage);
               throw FetchDataException(errorMessage);
             }
+          } else if (data is List && data.length > 1 && data[1] is Map) {
+            final tickerData = data[1] as Map<String, dynamic>;
+            if (tickerData.containsKey('c') && tickerData.containsKey('v')) {
+              _logger.i("Received Ticker Data for pair $_currentPair: $tickerData");
+            } else {
+              _logger.w("Invalid ticker data format for pair $_currentPair: $tickerData");
+            }
+          } else {
+            _logger.w("Unexpected WebSocket message format for pair $_currentPair: $data");
           }
         } catch (e) {
-          _logger.e(
-              "Error parsing WebSocket message for pair $_currentPair: $e, Message: $message");
+          _logger.e("Error parsing WebSocket message for pair $_currentPair: $e, Message: $message");
           onError?.call("Error parsing WebSocket message: $e");
         }
       },
@@ -106,9 +107,12 @@ class KrakenRepository {
     _reconnectAttempts++;
     _reconnectTimer?.cancel();
     _reconnectTimer = Timer(_reconnectDelay * _reconnectAttempts, () {
-      _logger.i(
-          "Attempting WebSocket reconnect ($_reconnectAttempts/$_maxReconnectAttempts) for pair $_currentPair");
-      establishConnection(_currentPair ?? 'XBTUSD');
+      _logger.i("Attempting WebSocket reconnect ($_reconnectAttempts/$_maxReconnectAttempts) for pair $_currentPair");
+      if (_currentPair != null) {
+        establishConnection(_currentPair!, onError: (error) {
+          _logger.e("Reconnect error: $error");
+        });
+      }
     });
   }
 
@@ -118,11 +122,13 @@ class KrakenRepository {
     _reconnectTimer?.cancel();
     _reconnectAttempts = 0;
     _currentPair = null;
+    _logger.i("Closed WebSocket connection.");
   }
 
   void dispose() {
     closeConnection();
     _client.close();
+    _logger.i("KrakenRepository disposed.");
   }
 
   Future<List<Candle>> fetchCandles({
@@ -132,25 +138,23 @@ class KrakenRepository {
     final uri = Uri.parse(
       "${_corsProxyUrl}${_restApiUrl}/OHLC?pair=$productId&interval=${interval.value}",
     );
-    _logger.d(
-        'Fetching candles for pair: $productId, interval: ${interval.value} from URI: $uri');
+    _logger.d('Fetching candles for pair: $productId, interval: ${interval.value} from URI: $uri');
 
     try {
       final res = await _client.get(uri);
       if (res.statusCode == 200) {
         _retryAttempts = 0;
-        return _parseCandles(res.body);
+        return await _parseCandles(res.body);
       } else if (res.statusCode == 429) {
-        if (_retryAttempts >= _maxRetryAttempts)
+        if (_retryAttempts >= _maxRetryAttempts) {
           throw FetchDataException("Rate limit exceeded after max retries.");
+        }
         _retryAttempts++;
-        _logger.w(
-            "Rate limit exceeded for pair $productId. Retrying in ${_rateLimitRetryDelay.inSeconds} seconds...");
+        _logger.w("Rate limit exceeded for pair $productId. Retrying in ${_rateLimitRetryDelay.inSeconds} seconds...");
         await Future.delayed(_rateLimitRetryDelay);
         return fetchCandles(productId: productId, interval: interval);
       } else {
-        throw FetchDataException(
-            "Failed to fetch candles for pair $productId: ${res.statusCode}");
+        throw FetchDataException("Failed to fetch candles for pair $productId: ${res.statusCode}");
       }
     } catch (e) {
       _logger.e("Exception when fetching candles for pair $productId: $e");
@@ -158,50 +162,65 @@ class KrakenRepository {
     }
   }
 
-  List<Candle> _parseCandles(String body) {
-    try {
-      final data = jsonDecode(body);
-      _validateResponse(data);
+  Future<List<Candle>> _parseCandles(String body) async {
+    int retryCount = 0;
+    const maxRetries = 3;
+    while (retryCount < maxRetries) {
+      try {
+        final data = jsonDecode(body);
+        _validateResponse(data);
 
-      final result = data['result'] as Map<String, dynamic>;
-      final pairKey =
-          result.keys.firstWhere((key) => key != 'last', orElse: () {
-        throw InvalidResponseException(
-            "No valid pair key found in response", data);
-      });
-      final ohlcData = result[pairKey] as List<dynamic>;
+        final result = data['result'] as Map<String, dynamic>;
+        final pairKey = result.keys.firstWhere((key) => key != 'last', orElse: () {
+          throw InvalidResponseException("No valid pair key found in response", data);
+        });
+        final ohlcData = result[pairKey] as List<dynamic>;
 
-      return ohlcData
-          .map((entry) {
-            if (entry is! List || entry.length < 7) {
-              throw InvalidResponseException(
-                  "Invalid candle data format", entry);
-            }
-            if (entry[0] is! int)
-              throw InvalidResponseException("Invalid timestamp format", entry);
-            return Candle(
-              date: DateTime.fromMillisecondsSinceEpoch(entry[0] * 1000,
-                  isUtc: true),
-              open: double.parse(entry[1].toString()),
-              high: double.parse(entry[2].toString()),
-              low: double.parse(entry[3].toString()),
-              close: double.parse(entry[4].toString()),
-              volume: double.parse(entry[6].toString()),
-            );
-          })
-          .toList()
-          .reversed
-          .toList();
-    } catch (e) {
-      _logger.e("Error parsing candle data: $e");
-      throw InvalidResponseException("Error parsing candle data", body);
+        final candles = ohlcData
+            .asMap()
+            .entries
+            .map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              if (item is! List || item.length < 7) {
+                throw InvalidResponseException("Invalid candle data format at index $index", item);
+              }
+              if (item[0] is! int) {
+                throw InvalidResponseException("Invalid timestamp format at index $index", item);
+              }
+              return Candle(
+                date: DateTime.fromMillisecondsSinceEpoch(item[0] * 1000, isUtc: true),
+                open: double.parse(item[1].toString()),
+                high: double.parse(item[2].toString()),
+                low: double.parse(item[3].toString()),
+                close: double.parse(item[4].toString()),
+                volume: double.parse(item[6].toString()),
+                // index: index,
+              );
+            })
+            .toList()
+            .reversed
+            .toList();
+
+        if (candles.isEmpty) {
+          throw InvalidResponseException("No candles parsed from response", body);
+        }
+        return candles;
+      } catch (e) {
+        retryCount++;
+        _logger.e("Error parsing candle data (attempt $retryCount/$maxRetries): $e");
+        if (retryCount >= maxRetries) {
+          throw InvalidResponseException("Error parsing candle data after $maxRetries retries", body);
+        }
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
     }
+    return [];
   }
 
   void _validateResponse(Map<String, dynamic> data) {
     if (data.containsKey('error') && (data['error'] as List).isNotEmpty) {
-      throw InvalidResponseException(
-          "Kraken API returned error: ${data['error']}", data);
+      throw InvalidResponseException("Kraken API returned error: ${data['error']}", data);
     }
     if (!data.containsKey('result') || data['result'] == null) {
       throw InvalidResponseException("Missing 'result' key", data);
@@ -225,13 +244,11 @@ class KrakenRepository {
           throw FetchDataException("Rate limit exceeded after max retries.");
         }
         _retryAttempts++;
-        _logger.w(
-            "Rate limit exceeded for trading pairs. Retrying in ${_rateLimitRetryDelay.inSeconds} seconds...");
+        _logger.w("Rate limit exceeded for trading pairs. Retrying in ${_rateLimitRetryDelay.inSeconds} seconds...");
         await Future.delayed(_rateLimitRetryDelay);
         return fetchTradingPairs();
       } else {
-        throw FetchDataException(
-            "Failed to fetch trading pairs: ${res.statusCode}, Response: ${res.body}");
+        throw FetchDataException("Failed to fetch trading pairs: ${res.statusCode}, Response: ${res.body}");
       }
     } catch (e) {
       _logger.e("Exception when fetching trading pairs: $e, URI: $uri");
@@ -239,79 +256,29 @@ class KrakenRepository {
     }
   }
 
-  // Future<Map<String, double>> getCryptoPrices(List<String> coinIds) async {
-  //   final ids = coinIds.join(',');
-  //   final apiUrl =
-  //       'https://api.coingecko.com/api/v3/simple/price?ids=$ids&vs_currencies=usd';
-
-  //   try {
-  //     final response = await _client.get(Uri.parse(apiUrl));
-  //     if (response.statusCode == 200) {
-  //       final jsonData = jsonDecode(response.body);
-  //       Map<String, double> prices = {};
-
-  //       for (var id in coinIds) {
-  //         if (jsonData.containsKey(id) && jsonData[id].containsKey('usd')) {
-  //           prices[id] = jsonData[id]['usd'].toDouble();
-  //         }
-  //       }
-  //       return prices;
-  //     } else {
-  //       throw Exception(
-  //           'Failed to load prices. Status code: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     _logger.e('Error fetching prices: $e');
-  //     rethrow;
-  //   }
-  // }
-
-  /// Fetches 24-hour percentage changes for trading pairs.
-  Future<(Map<String, double>, Map<String, double>)> getCryptoPriceChanges(
-      List<String> coinIds) async {
+  Future<(Map<String, double>, Map<String, double>)> getCryptoPriceChanges(List<String> coinIds) async {
     final ids = coinIds.join(',');
-    final apiUrl =
-        'https://api.coingecko.com/api/v3/simple/price?ids=$ids&vs_currencies=usd&include_24hr_change=true';
-    // _logger.d('Fetching price changes for coins: $ids from URI: $apiUrl');
+    final apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=$ids&vs_currencies=usd&include_24hr_change=true';
+    _logger.d('Fetching price changes for coins: $ids from URI: $apiUrl');
 
     try {
       final response = await _client.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
-        print(jsonData);
         Map<String, double> changes = {};
         Map<String, double> prices = {};
-        
+
         for (var id in coinIds) {
-          if (jsonData.containsKey(id)) {
-            if (jsonData[id].containsKey('usd_24h_change')) {
-              changes[id] = jsonData[id]['usd_24h_change'].toDouble();
-            } else {
-              _logger.w("No 24h change data for coin: $id");
-              changes[id] = 0.00;
-            }
-            
-            if (jsonData[id].containsKey('usd')) {
-              prices[id] = jsonData[id]['usd'].toDouble();
-            } else {
-              _logger.w("No price data for coin: $id");
-              prices[id] = 0.00;
-            }
-          } else {
-            _logger.w("No data for coin: $id");
-            changes[id] = 0.00;
-            prices[id] = 0.00;
-          }
+          changes[id] = jsonData[id]?['usd_24h_change']?.toDouble() ?? 0.0;
+          prices[id] = jsonData[id]?['usd']?.toDouble() ?? 0.0;
         }
         return (changes, prices);
       } else {
-        throw FetchDataException(
-            "Failed to load price changes from CoinGecko. Status code: ${response.statusCode}, Response: ${response.body}");
+        throw FetchDataException("Failed to load price changes from CoinGecko: ${response.statusCode}");
       }
-    } catch (e, st) {
-      _logger.e(
-          'Error fetching price changes from CoinGecko: $e, Stack trace: $st');
+    } catch (e) {
+      _logger.e('Error fetching price changes from CoinGecko: $e');
       rethrow;
     }
-}
+  }
 }

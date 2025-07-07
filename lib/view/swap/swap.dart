@@ -45,6 +45,8 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
     {'pair': 'XUSD', 'label': 'X'},
   ];
 
+  String vvaule = '';
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +55,7 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
 
   void _initializeState() {
     setState(() {
+      vvaule = symbols.first['label']!;
       currentSymbol = widget.symbol ?? 'XBTUSD';
       currentLabel = symbols.firstWhere((s) => s['pair'] == currentSymbol,
           orElse: () => symbols[0])['label']!;
@@ -153,54 +156,22 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
     }
   }
 
-  static String _getsymbol(String symbol) {
-    switch (symbol) {
-      case 'BTC':
-        return "BTC";
-      case 'XBTUSD':
-        return "BTC";
-      case 'BTCUSD':
-        return "BTC";
-      case 'ETHUSD':
-        return "ETH";
-      case 'XDGUSD':
-        return "DOGE";
-      case 'SOLUSD':
-        return "SOL";
-      case 'BNBUSD':
-        return "BNB";
-      case 'HMSTRUSD':
-        return "HMSTR";
-      case 'PEPEUSD':
-        return "PEPE";
-      case 'MNTUSD':
-        return "MNT";
-      case 'TRXUSD':
-        return "TRX";
-      case 'USDTUSD':
-        return "USDT";
-      case 'USDCUSD':
-        return "USDC";
-      case 'XRPUSD':
-        return "XRP";
-      case 'XUSD':
-        return "X";
-      default:
-        return "BTC";
-    }
-  }
-
   Future<void> _processSwap() async {
     final sourceAmount = _parseAmount(_searchController.text);
     final targetAmount = _parseAmount(_amountController.text);
 
     if (sourceAmount == null || targetAmount == null) return;
 
+    print(sourceAmount.toString());
+    print(targetAmount.toString());
+    print(currentLabel);
+    print(_formatSymbol(currentSymbol));
+
     await TransferService.swapRequest(
       sourceAmount.toString(),
       targetAmount.toString(),
-      _getsymbol(currentLabel),
-      _getsymbol(currentSymbol),
+      currentLabel,
+      _formatSymbol(currentSymbol),
     );
 
     showMessage(
@@ -267,7 +238,7 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
 
     if (_errorMessage != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Convert')),
+        appBar: AppBar(title: const Text('Swap')),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -287,7 +258,7 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Convert'),
+        title: const Text('Swap'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -299,9 +270,8 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
                 autovalidateMode: AutovalidateMode.always,
                 key: _formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const SizedBox(height: 8),
                     _buildSearchTextField(),
                     const SizedBox(height: 24),
                     Text(
@@ -335,7 +305,45 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
     );
   }
 
+  Widget _buildSwapButtons() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.8,
+      child: DropdownButton<String>(
+        value: vvaule,
+        isExpanded: true,
+        items: symbols
+            .map((s) => DropdownMenuItem(
+                  value: s['label']!,
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        _getImagePath(s['label']!),
+                        height: 18,
+                        width: 18,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.error, size: 18),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(s['label']!),
+                    ],
+                  ),
+                ))
+            .toList(),
+        onChanged: (value) {
+          if (value != null && value != vvaule) {
+            setState(() {
+              vvaule = value;
+            });
+            _updateAmount(value);
+          }
+        },
+        hint: const Text('Select a cryptocurrency'),
+      ),
+    );
+  }
+
   Widget _buildSearchTextField() {
+    final user = ref.read(authProvider).user;
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -363,9 +371,12 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
         ),
         CustomTextField(
           labelText: 'Send Amount (${_formatSymbol(currentSymbol)})',
-          hintText: _formatPrice(currentSymbol),
+          hintText: _getUserBalance(currentSymbol, user!).toString(),
+          // _formatPrice(currentSymbol),
           controller: _searchController,
-          keyboardType: TextInputType.number,
+          keyboardType: TextInputType.numberWithOptions(
+            decimal: true,
+          ),
           prefixIcon: const Icon(Icons.dialpad),
           maxLines: 1,
           validator: (value) {
@@ -403,54 +414,6 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
     );
   }
 
-  Widget _buildSwapButtons() {
-    return Wrap(
-      children: symbols
-          .map((s) => _buildSwapButton(
-                s['label']!,
-                _getImagePath(s['label']!),
-              ))
-          .toList(),
-    );
-  }
-
-  Widget _buildSwapButton(String label, String image) {
-    return Padding(
-      padding: const EdgeInsets.all(18.0),
-      child: ElevatedButton(
-        onPressed: () => _updateAmount(label),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Theme.of(context).primaryColor,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-        ),
-        child: SizedBox(
-          height: 50,
-          width: 78,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(
-                image,
-                height: 18,
-                width: 18,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style:
-                    const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   String _getImagePath(String label) {
     switch (label) {
       case 'BTC':
@@ -484,12 +447,12 @@ class _SwapcoinState extends ConsumerState<Swapcoin> {
     }
   }
 
-  String _formatPrice(String symbol) {
-    final user = ref.read(authProvider).user;
-    final balance = _getUserBalance(symbol, user!);
-    return numToCurrency(
-        balance * (ref.read(priceProvider)[symbol] ?? 0.0), '2');
-  }
+  // String _formatPrice(String symbol) {
+  //   final user = ref.read(authProvider).user;
+  //   final balance = _getUserBalance(symbol, user!);
+  //   return numToCurrency(
+  //       balance * (ref.read(priceProvider)[symbol] ?? 0.0), '2');
+  // }
 
   String _formatSymbol(String symbol) {
     return symbols.firstWhere((s) => s['pair'] == symbol,

@@ -199,6 +199,118 @@ class TransactionTile extends ConsumerWidget {
         'subtitle': 'Binance Coin worth: ${numToCurrency(amount * price, '2')}',
         'amount': '${numToCrypto(amount)} BNB',
       };
+    } else if (transaction.HMSTR != null && transaction.HMSTR != 0) {
+      final amount = transaction.HMSTR!;
+      final price = prices['HMSTRUSD'] ?? 0.0;
+      return {
+        'network': 'Hamster-Kombat',
+        'asset': 'assets/images/hmstr.png',
+        'title': isTrade
+            ? 'HMSTR Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'HMSTR Withdrew: ${numToCrypto(amount)}'
+                : 'HMSTR Received: ${numToCrypto(amount)}',
+        'subtitle': 'Hamster-Kombat worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} HMSTR',
+      };
+    }else if (transaction.PEPE != null && transaction.PEPE != 0) {
+      final amount = transaction.PEPE!;
+      final price = prices['PEPEUSD'] ?? 0.0;
+      return {
+        'network': 'PEPE',
+        'asset': 'assets/images/pepe.jpeg',
+        'title': isTrade
+            ? 'PEPE Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'PEPE Withdrew: ${numToCrypto(amount)}'
+                : 'PEPE Received: ${numToCrypto(amount)}',
+        'subtitle': 'PEPE worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} PEPE',
+      };
+    }else if (transaction.MNT != null && transaction.MNT != 0) {
+      final amount = transaction.MNT!;
+      final price = prices['MNTUSD'] ?? 0.0;
+      return {
+        'network': 'MNT',
+        'asset': 'assets/images/MNT.png',
+        'title': isTrade
+            ? 'MNT Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'MNT Withdrew: ${numToCrypto(amount)}'
+                : 'MNT Received: ${numToCrypto(amount)}',
+        'subtitle': 'MNT worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} MNT',
+      };
+    }else if (transaction.TRX != null && transaction.TRX != 0) {
+      final amount = transaction.TRX!;
+      final price = prices['TRXUSD'] ?? 0.0;
+      return {
+        'network': 'Tron',
+        'asset': 'assets/images/TRX.png',
+        'title': isTrade
+            ? 'TRX Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'TRX Withdrew: ${numToCrypto(amount)}'
+                : 'TRX Received: ${numToCrypto(amount)}',
+        'subtitle': 'Tron worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} TRX',
+      };
+    }else if (transaction.USDT != null && transaction.USDT != 0) {
+      final amount = transaction.USDT!;
+      final price = prices['USDTUSD'] ?? 0.0;
+      return {
+        'network': 'Tether',
+        'asset': 'assets/images/usdt.png',
+        'title': isTrade
+            ? 'USDT Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'USDT Withdrew: ${numToCrypto(amount)}'
+                : 'USDT Received: ${numToCrypto(amount)}',
+        'subtitle': 'Tether worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} USDT',
+      };
+    }else if (transaction.USDC != null && transaction.USDC != 0) {
+      final amount = transaction.USDC!;
+      final price = prices['USDCUSD'] ?? 0.0;
+      return {
+        'network': 'USDC',
+        'asset': 'assets/images/usdc.png',
+        'title': isTrade
+            ? 'USDC Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'USDC Withdrew: ${numToCrypto(amount)}'
+                : 'USDC Received: ${numToCrypto(amount)}',
+        'subtitle': 'USDC worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} USDC',
+      };
+    }else if (transaction.XRP != null && transaction.XRP != 0) {
+      final amount = transaction.XRP!;
+      final price = prices['XRPUSD'] ?? 0.0;
+      return {
+        'network': 'Ripple',
+        'asset': 'assets/images/xrp.png',
+        'title': isTrade
+            ? 'XRP Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'XRP Withdrew: ${numToCrypto(amount)}'
+                : 'XRP Received: ${numToCrypto(amount)}',
+        'subtitle': 'Ripple worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} XRP',
+      };
+    }else if (transaction.X != null && transaction.X != 0) {
+      final amount = transaction.X!;
+      final price = prices['XUSD'] ?? 0.0;
+      return {
+        'network': 'Solana',
+        'asset': 'assets/images/x.png',
+        'title': isTrade
+            ? 'X Spot Trading: ${numToCrypto(amount)}'
+            : isWithdraw
+                ? 'X Withdrew: ${numToCrypto(amount)}'
+                : 'X Received: ${numToCrypto(amount)}',
+        'subtitle': 'Solana worth: ${numToCurrency(amount * price, '2')}',
+        'amount': '${numToCrypto(amount)} X',
+      };
     }
 
     return {
